@@ -24,7 +24,7 @@
 *
 * Filename      : main.h
 * Version       :
-* Programmer(s) : 
+* Programmer(s) :
 *********************************************************************************************************
 */
 
@@ -86,6 +86,7 @@
 extern u8 g_ucIsUpdateMenu;     // ¸üĞÂÏÔÊ¾
 
 extern u8 g_ucCurDlg;            // µ±Ç°ÏÔÊ¾µÄ²Ëµ¥ºÅ
+extern u8 g_ucHighLightRow;      // µ±Ç°ÏÔÊ¾µÄ²Ëµ¥ĞèÒª¸ßÁÁµÄĞĞ
 extern u8 g_ucCurID;             // µ±Ç°Í¨ĞÅÉè±¸µÄºÅ,ÔÚÉèÖÃÉè±¸ºÅÊ±ºòÊ¹ÓÃ
 extern u8 g_ucUpWorkingID;       // ÉÏ¹¤Î»¹¤×÷¿¨»úºÅ
 extern u8 g_ucUpBackingID;       // ÉÏ¹¤Î»±¸ÓÃ¿¨»úºÅ
@@ -97,7 +98,7 @@ extern u8 g_ucaDeviceIsSTBY[4];  // Á½¸ö¿¨»ú´¦ÓÚ´ı»ú(Standby)×´Ì¬ÏÂ,°´¼ü°´ÏÂ,Ö÷»
 extern u8 g_ucaMechineExist[4];  // ¿¨»úÊÇ·ñ´æÔÚ²¢Í¨ĞÅÕı³£
 extern Dlg           g_dlg[];
 extern Dlg g_dlg_fault_code[];
-extern RxQueue g_tRxQueueCan;        // CAN ¶ÓÁĞ 
+extern RxQueue g_tRxQueueCan;        // CAN ¶ÓÁĞ
 
 /*
 *********************************************************************************************************

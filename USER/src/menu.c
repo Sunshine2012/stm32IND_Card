@@ -68,6 +68,7 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
     u8 dlgId = check_menu(dlg_id);
     u8 master1[] = "工作";
     u8 master2[] = "备用";
+    u8 key = KEY_NUL;
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
     if(g_ucUpWorkingID == 1 && g_ucUpBackingID == 2)
     {
@@ -103,36 +104,48 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_dlg[dlgId].MsgRow[2][i + 2] = master2[i];
             g_dlg[dlgId].MsgRow[3][i + 2] = master1[i];
         }
-
     }
 
     for (i = 0; i < 4; i++)
     {
-        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == isNotRow ? 1 : 0);
+        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == g_dlg[dlgId].highLightRow ? 1 : 0);
     }
-    isTurnShow(0,isNotRow);
+    isTurnShow(0,g_dlg[dlgId].highLightRow);
+
+    key = g_ucKeyValues;
+    g_ucKeyValues = KEY_NUL;
+    switch (key)
+    {
+        case KEY_ENTRY:
+            doShowMainMenu (DLG_MAIN, 0, NULL);         // 进入设置状态
+            break;
+        default:
+            break;
+    }
 
 }
 
 // 显示菜单,如果有一行需要反显示,则设置当前行反显示,传递参数地址
 void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
 {
-    u8 i;
-    u8 dlgId = check_menu(dlg_id);
+    u8 i = 0;
     u8 key = KEY_NUL;
+    u8 dlgId = check_menu(dlg_id);
+    static u8 s_isNotRow = 0;
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
     for (i = 0; i < 4; i++)
     {
-        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == isNotRow ? 1 : 0);
+        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == s_isNotRow ? 1 : 0);
     }
-    isTurnShow(0,isNotRow);
+    isTurnShow(0,s_isNotRow);
     do
     {
         key = g_ucKeyValues;
+        g_ucKeyValues = KEY_NUL;
         switch (key)
         {
             case KEY_ENTRY:
-                switch (isNotRow)
+                switch (s_isNotRow)
                 {
                     case 0:
                         doShowStatusOne (DLG_STATUS_ONE, 5, NULL);
@@ -176,7 +189,8 @@ void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
                 }
                 break;
             case KEY_CANCEL:    // 退出
-                return;
+                g_ucCurDlg = DLG_STATUS;    // 退出到主菜单
+                break;
             default:
                 key = KEY_NUL;
                 break;

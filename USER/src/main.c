@@ -2,6 +2,7 @@
 
 u8 g_ucIsUpdateMenu     = 0;            // 更新显示
 u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
+u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
 u8 g_ucCurID            = 1;            // 当前通信设备的号
 u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
@@ -18,13 +19,14 @@ CanRxMsg g_tRxQueueMsg = {0};       // 出队元素
 void bspInit (void)
 {
     delayInit();                // 定时函数
+
     LED_Init ();                // 初始化 LED
 
     USART1_Config ();           // 初始化 USART1
     //USART4_Config ();         // 初始化 USART4
 
-
     //DAC_init();
+
     matrix_keyboard_init ();
 
     lcdInit();
@@ -38,19 +40,19 @@ void bspInit (void)
 void lcdRef()
 {
     u8 key = KEY_NUL;
-
+    /*
     if (g_ucCurDlg == DLG_MAIN && g_ucIsUpdateMenu || g_ucKeyValues == KEY_QUIT)
     {
         g_ucIsUpdateMenu = 0;
         g_ucKeyValues = KEY_NUL;
         doShowStatusMenu(DLG_STATUS, 5, NULL);      // 显示菜单,需要反显示的行号
     }
-
+    */
     if (g_ucaFaultCode[0] != 0 || g_ucaFaultCode[1] != 0 || g_ucaFaultCode[2] != 0 || g_ucaFaultCode[3] != 0)
     {
         doShowFaultCode (DLG_CLEAR_LCD, 5, NULL);
     }
-
+    /*
     key = g_ucKeyValues;
     g_ucKeyValues = KEY_NUL;
     if ( key == KEY_ENTRY )
@@ -58,7 +60,8 @@ void lcdRef()
         doShowMainMenu (DLG_MAIN, 0, NULL);
         g_ucIsUpdateMenu = 1;
     }
-    if (g_ucKeyValues != KEY_NUL)
+    */
+    if (g_ucKeyValues != KEY_NUL || g_ucIsUpdateMenu)
     {
         switch (g_ucCurDlg)
         {

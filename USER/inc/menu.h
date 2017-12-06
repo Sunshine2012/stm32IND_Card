@@ -33,6 +33,9 @@ typedef struct Dlg
 {
    unsigned char ID;
    char MsgRow[4][36];
+   unsigned char highLightRow;
+   unsigned char prevDlgID;            // 上一个菜单ID
+   unsigned char nextDlgID;            // 下一个菜单ID
 }Dlg;
 
 
