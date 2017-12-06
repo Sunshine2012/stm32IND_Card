@@ -4,6 +4,7 @@ u8 g_ucIsUpdateMenu     = 0;            // 更新显示
 u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
 u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
 u8 g_ucCurID            = 1;            // 当前通信设备的号
+u8 g_ucIsNewWarningCode = 0;            // 有新的报警,再次更新界面,在同一时候,有多个未处理的报警
 u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
@@ -23,6 +24,7 @@ void bspInit (void)
     LED_Init ();                // 初始化 LED
 
     USART1_Config ();           // 初始化 USART1
+
     //USART4_Config ();         // 初始化 USART4
 
     //DAC_init();
@@ -34,35 +36,29 @@ void bspInit (void)
     initQueue(&g_tRxQueueCan);
 
     canInit();                  // 初始化CAN通信
+
+    //generalTIMInit();
 }
 
 
 void lcdRef()
 {
     u8 key = KEY_NUL;
-    /*
-    if (g_ucCurDlg == DLG_MAIN && g_ucIsUpdateMenu || g_ucKeyValues == KEY_QUIT)
+
+    if ((g_ucKeyValues != KEY_NUL) || g_ucIsUpdateMenu)
     {
         g_ucIsUpdateMenu = 0;
-        g_ucKeyValues = KEY_NUL;
-        doShowStatusMenu(DLG_STATUS, 5, NULL);      // 显示菜单,需要反显示的行号
-    }
-    */
-    if (g_ucaFaultCode[0] != 0 || g_ucaFaultCode[1] != 0 || g_ucaFaultCode[2] != 0 || g_ucaFaultCode[3] != 0)
-    {
-        doShowFaultCode (DLG_CLEAR_LCD, 5, NULL);
-    }
-    /*
-    key = g_ucKeyValues;
-    g_ucKeyValues = KEY_NUL;
-    if ( key == KEY_ENTRY )
-    {
-        doShowMainMenu (DLG_MAIN, 0, NULL);
-        g_ucIsUpdateMenu = 1;
-    }
-    */
-    if (g_ucKeyValues != KEY_NUL || g_ucIsUpdateMenu)
-    {
+        if ((g_ucaFaultCode[0] != 0) || (g_ucaFaultCode[1] != 0)
+        || (g_ucaFaultCode[2] != 0) || (g_ucaFaultCode[3] != 0))
+        {
+            if ((g_ucIsNewWarningCode == 1) || (g_ucCurDlg != DLG_FAULT_CODE) || (g_ucKeyValues == KEY_CANCEL))
+            {
+                doShowFaultCode (DLG_FAULT_CODE, 5, NULL);
+            }
+            g_ucIsNewWarningCode = 0;
+            g_ucKeyValues = KEY_NUL;
+            return;
+        }
         switch (g_ucCurDlg)
         {
             case DLG_STATUS:
@@ -72,26 +68,27 @@ void lcdRef()
                 doShowMainMenu (DLG_MAIN, 0, NULL);         // 进入设置状态
                 break;
             case DLG_WORKING_SET:
-
+                doShowWorkingSet(DLG_WORKING_SET, 1, NULL);
                 break;
-
-            case DLG_STATUS_TWO:
+            case DLG_STATUS_ONE:
                 doShowStatusOne (DLG_STATUS_ONE, 5, NULL);
+                break;
+            case DLG_STATUS_TWO:
+                doShowStatusTwo (DLG_STATUS_TWO, 5, NULL);
                 break;
             case DLG_CARD_COUNT_SET:
                 doShowCardCountSet (DLG_CARD_COUNT_SET, 0, NULL);
                 break;
             case DLG_DEBUG_MAIN:
-
+                doShowDebugMain(DLG_DEBUG_MAIN, 0, NULL);
                 break;
             case DLG_DEBUG_ONE:
-
+                doShowDebugOne(DLG_DEBUG_ONE, 5, NULL);
                 break;
             case DLG_DEBUG_TWO:
-
+                doShowDebugTwo(DLG_DEBUG_TWO, 5, NULL);
                 break;
-            case DLG_DEBUG_THREE:
-
+            default:
                 break;
 
         }
@@ -108,7 +105,7 @@ int main(void)
     myCANTransmit(gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL);   // 设置备用态
     myCANTransmit(gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL);   // 设置工作态
     myCANTransmit(gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL);   // 设置备用态
-    //memset( &g_tRxQueueMsg, 0 ,sizeof (g_tRxQueueMsg) );
+    memset( &g_tRxQueueMsg, 0 ,sizeof (g_tRxQueueMsg) );
     doShowStatusMenu(DLG_STATUS, 5, NULL);      // 显示菜单,需要反显示的行
     while (1)
     {

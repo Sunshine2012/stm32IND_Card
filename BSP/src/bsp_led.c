@@ -46,9 +46,9 @@ void LED_Init ( void )
 {
     LED_GPIO_Config ();
 	
-	macLED1_OFF();
-	macLED2_OFF();
-	macLED3_OFF();
+	macLED1_ON();
+	macLED2_ON();
+	macLED3_ON();
 	
 }
 

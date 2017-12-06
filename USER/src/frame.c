@@ -382,6 +382,7 @@ u8 * checkPriMsg (u8 ch)
             {
                 g_ucaFaultCode[mtRxMessage.Data[1] - 1] = FAULT_CODE11 + 1; // 报告故障码
             }
+            g_ucIsNewWarningCode = 1;                       // 有新的报警,再次更新界面
             g_ucIsUpdateMenu    = 1;                        // 更新界面
             break;
         case CARD_MACHINE_INIT_ACK:

@@ -54,7 +54,7 @@
 extern uint32_t time; // ms 计时变量
 
 
-void GENERAL_TIM_Init(void);
+void generalTIMInit(void);
 
 
 #endif  /* __BSP_GENERALTIME_H */

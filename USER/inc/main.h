@@ -88,6 +88,7 @@ extern u8 g_ucIsUpdateMenu;     // 更新显示
 extern u8 g_ucCurDlg;            // 当前显示的菜单号
 extern u8 g_ucHighLightRow;      // 当前显示的菜单需要高亮的行
 extern u8 g_ucCurID;             // 当前通信设备的号,在设置设备号时候使用
+extern u8 g_ucIsNewWarningCode;  // 有新的报警,再次更新界面,在同一时候,有多个未处理的报警
 extern u8 g_ucUpWorkingID;       // 上工位工作卡机号
 extern u8 g_ucUpBackingID;       // 上工位备用卡机号
 extern u8 g_ucDownWorkingID;     // 下工位工作卡机号

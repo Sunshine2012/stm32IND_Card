@@ -160,11 +160,8 @@ void USART4_nSendString(USART_TypeDef * pUSARTx,char *str,int n)
 ///重定向c库函数printf到串口，重定向后可使用printf函数
 int fputc(int ch, FILE *f)
 {
-    u32 i = 100000000;
-	/* 发送一个字节数据到串口 */
-	USART_SendData(macUSART4, (uint8_t) ch);
-
-	/* 等待发送完毕 */
+    u32 i = 1000;
+    /* 等待发送完毕,即检测上次发送的数据 */
 	while (USART_GetFlagStatus(macUSART4, USART_FLAG_TXE) == RESET)
     {
         if (i-- == 0)
@@ -172,6 +169,8 @@ int fputc(int ch, FILE *f)
             break;
         }
     }
+	/* 发送一个字节数据到串口 */
+	USART_SendData(macUSART4, (u8) ch);
 
 	return (ch);
 }
@@ -179,7 +178,7 @@ int fputc(int ch, FILE *f)
 ///重定向c库函数scanf到串口，重写向后可使用scanf、getchar等函数
 int fgetc(FILE *f)
 {
-    u32 i = 100000000;
+    u32 i = 1000;
 	/* 等待串口输入数据 */
 	while (USART_GetFlagStatus(macUSART4, USART_FLAG_RXNE) == RESET)
 	{

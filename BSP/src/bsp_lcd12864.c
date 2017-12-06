@@ -404,8 +404,7 @@ void displayGB2312String( u8 x, u8 y, u8 * text, u8 isTurn )
             i++;
         }
     }
-    
-    
+    /*
     if(isTurn)
     {
         lcdWriteByte( 0x30, 0 );
@@ -418,7 +417,8 @@ void displayGB2312String( u8 x, u8 y, u8 * text, u8 isTurn )
         lcdSetXy( 0, y );
         lcdWriteByte( 0x0c, 0 );
     }
-    
+    */
+
 }
 
 /**********************************************************

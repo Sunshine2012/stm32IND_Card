@@ -157,9 +157,7 @@ void CANTransmit (void * p_Msg)
     u32 i = 0;
     u8 TransmitMailbox;
     CanTxMsg *p_TxMessage = (CanTxMsg *)p_Msg;
-    //CanRxMsg RxMessage;
 
-    /* transmit */
     TransmitMailbox = CAN_Transmit(CAN1,p_TxMessage);
     i = 0;
     while((CAN_TransmitStatus(CAN1,TransmitMailbox) != CANTXOK) && (i != 0xFF))
@@ -293,22 +291,46 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     CAN_ITConfig(CAN1,CAN_IT_FMP0, DISABLE);
     CAN_Receive(CAN1,CAN_FIFO0, &gt_RxMessage);
     // CANTransmit (&gt_RxMessage);
-    // macLED1_TOGGLE ();
     if(((0x0000ff00 & gt_RxMessage.ExtId) == 0x00007800) && (gt_RxMessage.IDE == CAN_ID_EXT))
     {
         if (gt_RxMessage.Data[3] == 0x06)
         {
             g_ucaMechineExist[gt_RxMessage.Data[1] - 1] = 1;
         }
+        else if (gt_RxMessage.Data[3] == 0xaa)
+        {
+            switch (gt_RxMessage.Data[4])
+            {
+            case 1:
+                g_ucKeyValues = KEY_ENTRY;
+                break;
+            case 2:
+                g_ucKeyValues = KEY_OK;
+                break;
+            case 3:
+                g_ucKeyValues = KEY_CANCEL;
+                break;
+            case 4:
+                g_ucKeyValues = KEY_QUIT;
+                break;
+            case 5:
+                g_ucKeyValues = KEY_UP;
+                break;
+            case 6:
+                g_ucKeyValues = KEY_DOWN;
+                break;
+            case 7:
+                g_ucKeyValues = KEY_LEFT;
+                break;
+            case 8:
+                g_ucKeyValues = KEY_RIGHT;
+                break;
+            default:
+                break;
+            }
+        }
         else
         {
-            /* 发布消息到消息队列 queue */
-              /*OSQPost ((OS_Q        *)&queue_can,                             //消息变量指针
-                    (void        *)&gt_RxMessage,                           //要发送的数据的指针，将内存块首地址通过队列"发送出去"
-                    (OS_MSG_SIZE  )sizeof (gt_RxMessage) ,                  //数据字节大小
-                    (OS_OPT       )OS_OPT_POST_FIFO | OS_OPT_POST_ALL,      //先进先出和发布给全部任务的形式
-                    (OS_ERR      *)&err);
-             */
             inQueue (&g_tRxQueueCan, &gt_RxMessage);
         }
 
@@ -317,7 +339,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     {
 
     }
-    //CAN_ClearITPendingBit(CAN1, CAN_IT_FMP0);
+    CAN_ClearITPendingBit(CAN1, CAN_IT_FMP0);
     CAN_ITConfig(CAN1,CAN_IT_FMP0, ENABLE);
 }
 

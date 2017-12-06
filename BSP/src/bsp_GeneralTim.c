@@ -14,10 +14,13 @@ void  GENERAL_TIM_IRQHandler (void)
     {
         TIM_ClearITPendingBit(GENERAL_TIM , TIM_FLAG_Update);       // 清中断
         time++;
-        if (time == 100)
+        if (time == 30000)
         {
             time = 0;
             //g_ucaDeviceIsSTBY[pRxMessage->Data[1] - 1] = 1;
+            // macLED2_TOGGLE();
+            g_ucKeyValues = KEY_QUIT;                                   // 30秒钟将屏幕回到主显示
+            LCD_BAK_SET;
             TIM_ITConfig(GENERAL_TIM,TIM_IT_Update,DISABLE);            // 关闭中断
         }
 
@@ -82,7 +85,7 @@ static void GENERAL_TIM_Mode_Config(void)
     TIM_Cmd(GENERAL_TIM, ENABLE);
 }
 
-void GENERAL_TIM_Init(void)
+void generalTIMInit(void)
 {
     GENERAL_TIM_NVIC_Config();
     GENERAL_TIM_Mode_Config();

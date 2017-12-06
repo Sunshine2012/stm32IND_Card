@@ -192,6 +192,7 @@ u8 matrix_update_key(void)
     unsigned char i = 0;
     unsigned char j = 0;
     unsigned char ucTime = 0;
+    static unsigned char isReleaseKey = 1;
     if (g_ucKeyValues != KEY_NUL)
     {
         return 0;
@@ -203,11 +204,13 @@ u8 matrix_update_key(void)
         {
             if(!GPIO_ReadInputDataBit(matrix_key_input[j].GPIO_x, matrix_key_input[j].GPIO_pin))
             {
+                delayMs(1);
                 while(!GPIO_ReadInputDataBit(matrix_key_input[j].GPIO_x, matrix_key_input[j].GPIO_pin))
                 {
+                    delayMs(10);
                     if (g_ucKeyContinu == 1)        // 以下是超时处理
                     {
-                        if (ucTime++ == 2)         // 如果是连续按键,20ms退出,加上进程延时10ms,共210ms发送一次按键
+                        if (ucTime++ == 20)         // 如果是连续按键,20ms退出,加上进程延时10ms,共210ms发送一次按键
                         {
                             ucTime = 0;
                             g_ucKeyContinu = 0;     // 连续模式按键,松开之后直接退出
@@ -216,7 +219,7 @@ u8 matrix_update_key(void)
                     }
                     else
                     {
-                        if (ucTime++ == 50)
+                        if (ucTime++ == 200)
                         {
                             // 长按,或者一直被拉低的情况,认为是错误情况,认为没有按键按下
                             ucTime = 0;
@@ -226,6 +229,7 @@ u8 matrix_update_key(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
+                generalTIMInit();       // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
                 return 0;
             }
         }
