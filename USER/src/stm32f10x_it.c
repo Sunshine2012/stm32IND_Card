@@ -145,81 +145,84 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-u8 g_rx_buf[1024];    // 使用全局的数据缓存
+u8 g_rx_buf[1024]; // 使用全局的数据缓存
 u8 g_num = 0;
 
 // 串口中断服务函数
-// 把接收到的数据存在一个数组缓冲区里面，当接收到的的值等于0XFF时，把值返回
-void macUSART1_IRQHandler(void)
+// 把接收到的数据存在一个数组缓冲区里面，当接收到的的值等于">"时，把值返回
+void macUSART1_IRQHandler( void )
 {
-
-    if(USART_GetITStatus(macUSART1,USART_IT_RXNE)!=RESET)
+    if ( USART_GetITStatus( macUSART1, USART_IT_RXNE ) != RESET )
     {
-        g_rx_buf[g_num] = USART_ReceiveData(macUSART1);
-        if(g_rx_buf[g_num] == FRAME_START)
+        g_rx_buf[g_num] = USART_ReceiveData( macUSART1 );
+
+        if ( g_rx_buf[g_num] == FRAME_START )
         {
-            memset(g_rx_buf, 0, sizeof (g_rx_buf));
+            memset( g_rx_buf, 0, sizeof( g_rx_buf ) );
             g_rx_buf[0] = FRAME_START;
             g_num = 0;
             g_num++;
         }
-        else if( g_rx_buf[g_num] == FRAME_END)  // 当接收到的值等于'>'时，结束一帧数据
+        else if ( g_rx_buf[g_num] == FRAME_END ) // 当接收到的值等于'>'时，结束一帧数据
         {
-            g_rx_buf[g_num + 1] = 0;
-            /* 发布消息到消息队列 queue */
+            g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
 
+            /* 发布消息到消息队列 queue */
+            uartInQueue( &g_tUARTRxQueue, g_ucaUartRxMsg ); // 不考虑竞争,所以不设置自旋锁
         }
+
         // 当值不等时候，则继续接收下一个
         else
         {
             g_num++;
-            if (g_num > 50) //一帧数据最大50字节,超出则丢弃
+
+            if ( g_num > 50 ) //一帧数据最大50字节,超出则丢弃
             {
                 g_num = 0;
             }
         }
     }
 }
-#if uart4
-// 串口中断服务函数
-// 把接收到的数据存在一个数组缓冲区里面，当接收到的的值等于0XFF时，把值返回
-void macUSART4_IRQHandler(void)
-{
 
-    if(USART_GetITStatus(macUSART4,USART_IT_RXNE)!=RESET)
+#if uart4
+
+// 串口中断服务函数
+// 把接收到的数据存在一个数组缓冲区里面，当接收到的的值等于">"时，把值返回
+void macUSART4_IRQHandler( void )
+{
+    if ( USART_GetITStatus( macUSART4, USART_IT_RXNE ) != RESET )
     {
-        g_rx_buf[g_num] = USART_ReceiveData(macUSART4);
-        if(g_rx_buf[g_num] == FRAME_START)
+        g_rx_buf[g_num] = USART_ReceiveData( macUSART4 );
+
+        if ( g_rx_buf[g_num] == FRAME_START )
         {
-            memset(g_rx_buf, 0, sizeof (g_rx_buf));
+            memset( g_rx_buf, 0, sizeof( g_rx_buf ) );
             g_rx_buf[0] = FRAME_START;
             g_num = 0;
             g_num++;
         }
-        else if( g_rx_buf[g_num] == FRAME_END)  // 当接收到的值等于'>'时，结束一帧数据
+        else if ( g_rx_buf[g_num] == FRAME_END ) // 当接收到的值等于'>'时，结束一帧数据
         {
-            g_rx_buf[g_num + 1] = 0;
+            g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
+
             /* 发布消息到消息队列 queue */
-            /*OSQPost ((OS_Q        *)&queue_uart,                            //消息变量指针
-                     (void        *)g_rx_buf,                               //要发送的数据的指针，将内存块首地址通过队列"发送出去"
-                     (OS_MSG_SIZE  )strlen ( (const char*)g_rx_buf ),       //数据字节大小
-                     (OS_OPT       )OS_OPT_POST_FIFO | OS_OPT_POST_ALL,     //先进先出和发布给全部任务的形式
-                     (OS_ERR      *)&err);                                  //返回错误类型
-										 */
+            uartInitQueue( &g_tUARTRxQueue, g_ucaUartRxMsg ); // 不考虑竞争,所以不设置自旋锁
         }
+
         // 当值不等时候，则继续接收下一个
         else
         {
             g_num++;
-            if (g_num > 50) //一帧数据最大50字节,超出则丢弃
+
+            if ( g_num > 50 ) //一帧数据最大50字节,超出则丢弃
             {
                 g_num = 0;
             }
         }
     }
-
 }
 #endif
+
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

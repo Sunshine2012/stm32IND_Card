@@ -99,7 +99,11 @@ extern u8 g_ucaDeviceIsSTBY[4];  // Á½¸ö¿¨»ú´¦ÓÚ´ı»ú(Standby)×´Ì¬ÏÂ,°´¼ü°´ÏÂ,Ö÷»
 extern u8 g_ucaMechineExist[4];  // ¿¨»úÊÇ·ñ´æÔÚ²¢Í¨ĞÅÕı³£
 extern Dlg           g_dlg[];
 extern Dlg g_dlg_fault_code[];
-extern CanRxQueue g_tRxQueueCan; // CAN ¶ÓÁĞ
+
+extern CanQueue  g_tCanRxQueue;        // CAN½ÓÊÕ¿¨»úÊı¾İ¶ÓÁĞ
+extern UartQueue g_tUARTRxQueue;       // UART½ÓÊÕPC»úÊı¾İ¶ÓÁĞ
+extern CanRxMsg  g_tCanRxMsg;          // CANÊı¾İ³ö¶ÓÔªËØ
+extern u8 g_ucaUartRxMsg[50];          // UARTÊı¾İ³ö¶ÓÔªËØ
 
 /*
 *********************************************************************************************************

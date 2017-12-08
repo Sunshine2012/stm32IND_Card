@@ -331,7 +331,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
         }
         else
         {
-            canInQueue (&g_tRxQueueCan, &gt_RxMessage);
+            canInQueue (&g_tCanRxQueue, &gt_RxMessage);
         }
 
     }

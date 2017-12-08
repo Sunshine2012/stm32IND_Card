@@ -39,29 +39,32 @@
 #define CLRBIT(a, b)	(a = (a & (~(1 << b))))
 
 // 接收队列:接收卡机数据
-typedef struct CanRxQueue
+typedef struct CanQueue
 {
     CanRxMsg news[RX_DATA_BUFF_SIZE];
     u32 top;
     u32 bottom;
     u32 empty;        //不为零表示为空
-    u32  full;        //不为零表示满
-}CanRxQueue;
+    u32 full;         //不为零表示满
+}CanQueue;
 
-// 接收队列:接收卡机数据
-typedef struct UartRxQueue
+// 接收队列:接收上位机数据
+typedef struct UartQueue
 {
-    char new[RX_DATA_BUFF_SIZE][50];
+    char news[RX_DATA_BUFF_SIZE][50];
     u32 top;
     u32 bottom;
     u32 empty;        //不为零表示为空
-    u32  full;        //不为零表示满
-}UartRxQueue;
+    u32 full;         //不为零表示满
+}UartQueue;
 
+u8 canInitQueue (CanQueue * p_tQueue);
+u8 canInQueue (CanQueue * const p_tQueue, CanRxMsg * const p_tNewNode);
+u8 canOutQueue (CanQueue * const p_tQueue, CanRxMsg * p_tReturnNode);
 
-u8 canInitQueue (CanRxQueue * tCanRxQueue);
-u8 canInQueue (CanRxQueue * const p_tQueue, CanRxMsg * const p_tNewNode);
-u8 canOutQueue (CanRxQueue * const p_tQueue, CanRxMsg * p_tReturnNode);
+u8 uartInitQueue (UartQueue * p_tQueue);
+u8 uartInQueue (UartQueue * const p_tQueue, u8 * const p_ucaNewNode);
+u8 uartOutQueue (UartQueue * const p_tQueue, u8 * p_ucaReturnNode);
 
 
 #endif

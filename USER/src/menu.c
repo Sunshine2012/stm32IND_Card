@@ -434,7 +434,7 @@ void doShowStatusOne (u8 dlg_id, u8 isNotRow, void * p_parm)
             break;
         case KEY_QUIT:
             g_dlg[dlgId].highLightRow = 0;
-            g_ucCurDlg = DLG_MAIN;
+            g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
@@ -478,7 +478,7 @@ void doShowStatusTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
             break;
         case KEY_QUIT:
             g_dlg[dlgId].highLightRow = 0;
-            g_ucCurDlg = DLG_STATUS_ONE;
+            g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
@@ -635,7 +635,7 @@ void doShowWorkingSet (u8 dlg_id, u8 isNotRow, void * p_parm)
             break;
         case KEY_QUIT:
             g_dlg[dlgId].highLightRow = 0;
-            g_ucCurDlg = DLG_MAIN;
+            g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:

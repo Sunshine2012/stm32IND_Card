@@ -76,6 +76,7 @@
 #include <bsp_lcd12864.h>
 #include <bsp_delay.h>
 #include <bsp_can.h>
+#include <bsp_iwdg.h>
 #include <main.h>
 
 /*
