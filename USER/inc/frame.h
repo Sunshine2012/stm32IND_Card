@@ -338,7 +338,7 @@ extern unsigned int g_uiaInitCardCount[5];    // ¿¨³õÊ¼ÉèÖÃÖµ,[0]Îª×Ü¿¨ÊıÁ¿,·¢1Õ
 extern unsigned int g_uiaSpitCardCount[5];    // ³ö¿¨ÊıÁ¿,[0]Îª³ö¿¨×ÜÊıÁ¿,·¢1ÕÅ¿¨,¼Ó1,[1~4]ÎªÃ¿¸ö¿¨»ú·¢¿¨ÊıÁ¿,·¢1ÕÅ¿¨,¼Ó1.
 
 u8  analyzeCANFrame ( CanRxMsg arg );
-u8  analyzeUartFrame ( u8 argv[], unsigned int size );
+u8  analyzeUartFrame ( u8 argv[], u32 size );
 u8 * checkShowFaultCode (u8 ch);
 u8 * checkShowStatusMsg (u8 ch);
 u8 * checkShowMsg (u8 ch);

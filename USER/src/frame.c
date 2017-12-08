@@ -248,7 +248,7 @@ u8 * checkPriMsg (u8 ch)
             break;
         case CARD_SPIT_NOTICE:                          // 出卡通知
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
-            //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+            dacSet ( DATA_quka, SOUND_LENGTH_quka );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // 卡已被取走通知
@@ -307,7 +307,7 @@ u8 * checkPriMsg (u8 ch)
 
             g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
             printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
-            //dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
+            dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
             DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_TAKE_AWAY ) );
 

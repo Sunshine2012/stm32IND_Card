@@ -14,8 +14,9 @@ u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
 u8 g_ucaDeviceIsSTBY[4] = {1, 1, 1, 1}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 
-RxQueue g_tRxQueueCan = {0};        // 队列
-CanRxMsg g_tRxQueueMsg = {0};       // 出队元素
+CanRxQueue g_tRxQueueCan = {0};         // CAN队列
+//RxQueue g_tRxQueueUART = {0};           // UART队列
+CanRxMsg g_tRxQueueMsg = {0};           // 出队元素
 
 void bspInit (void)
 {
@@ -27,13 +28,13 @@ void bspInit (void)
 
     //USART4_Config ();         // 初始化 USART4
 
-    //DAC_init();
+    DAC_init();
 
     matrix_keyboard_init ();
 
     lcdInit();
 
-    initQueue(&g_tRxQueueCan);
+    canInitQueue(&g_tRxQueueCan);
 
     canInit();                  // 初始化CAN通信
 
@@ -110,10 +111,15 @@ int main(void)
     while (1)
     {
 
-        ret = outQueue( &g_tRxQueueCan ,&g_tRxQueueMsg );
+        ret = canOutQueue( &g_tRxQueueCan ,&g_tRxQueueMsg );
         if ( 0 == ret )
         {
             analyzeCANFrame(g_tRxQueueMsg);
+        }
+        //ret = outQueue (&g_);
+        if (0 == ret)
+        {
+            //analyzeUartFrame(u8 argv [ ], u32 size)
         }
         matrix_update_key();                            // 扫描按键
         lcdRef();

@@ -1,20 +1,20 @@
 /************************************************************
-  * ç‰ˆæƒæ‰€æœ‰(C)2014, å¹¿å·žæµ·æ ¼é€šä¿¡é›†å›¢è‚¡ä»½æœ‰é™å…¬å¸.
-  * é¡¹ç›®ä»£å·:       
-  * æ–‡ä»¶åç§°:       __QUEUE_H
-  * è¿è¡Œå¹³å°:       STM32F103VC
-  * ç¼–è¯‘çŽ¯å¢ƒ:       Keil 4.72 for Arm
-  * ç¨‹åºè¯­è¨€:       c
-  * å†…å®¹æ‘˜è¦:       
+  * °æÈ¨ËùÓÐ(C)2014
+  * ÏîÄ¿´úºÅ:
+  * ÎÄ¼þÃû³Æ:       __QUEUE_H
+  * ÔËÐÐÆ½Ì¨:       STM32F103VC
+  * ±àÒë»·¾³:       Keil 4.72 for Arm
+  * ³ÌÐòÓïÑÔ:       c
+  * ÄÚÈÝÕªÒª:
   *----------------------------------------------------------
-  * ä½œ    è€…:       .å½­æ°
-  * å»ºç«‹æ—¥æœŸ:        
-  * ç‰ˆ æœ¬ å·:       v1.0
-  * æ    è¿°:
-  *---------------------------------------------------------- 
-  * ä¿® æ”¹ è€…:  
-  * ä¿®æ”¹æ—¥æœŸ:
-  * æ    è¿°:
+  * ×÷    Õß:       .Åí½Ü
+  * ½¨Á¢ÈÕÆÚ:
+  * °æ ±¾ ºÅ:       v1.0
+  * Ãè    Êö:
+  *----------------------------------------------------------
+  * ÐÞ ¸Ä Õß:
+  * ÐÞ¸ÄÈÕÆÚ:
+  * Ãè    Êö:
 ************************************************************/
 
 
@@ -22,36 +22,46 @@
 #define __QUEUE_H__
 
 #include "includes.h"
-// æŽ¥æ”¶é˜Ÿåˆ—ç¼“å†²åŒºåŸŸå¤§å°
-#define RX_DATA_BUFF_SIZE       20
+// ½ÓÊÕ¶ÓÁÐ»º³åÇøÓò´óÐ¡
+#define RX_DATA_BUFF_SIZE       50
 
-// å°†ä¸¤ä¸ªå­—èŠ‚è½¬æ¢æˆåŠå­—
+// ½«Á½¸ö×Ö½Ú×ª»»³É°ë×Ö
 #define MAKE_HALF_WORD(a, b)	(((b & 0xff) << 8) | (a&0xff))
-// èŽ·å–shortç±»åž‹çš„æ•°æ®çš„ä½Žå­—èŠ‚
+// »ñÈ¡shortÀàÐÍµÄÊý¾ÝµÄµÍ×Ö½Ú
 #define LOWBYTE(a)		(a & 0xff)
-// èŽ·å–shortç±»åž‹çš„æ•°æ®çš„é«˜å­—èŠ‚ 
+// »ñÈ¡shortÀàÐÍµÄÊý¾ÝµÄ¸ß×Ö½Ú
 #define HIGHBYTE(a)		((a & 0xff00) >> 8)
-// æµ‹è¯•ä¸€ä¸ªå­—èŠ‚ä¸­ç¬¬bä½æ˜¯å¦ä¸º1
+// ²âÊÔÒ»¸ö×Ö½ÚÖÐµÚbÎ»ÊÇ·ñÎª1
 #define TESTBIT(a, b)   ((a >> b) & 0x01)
-// ç½®ä½æ•°æ®aä¸­çš„bä½
+// ÖÃÎ»Êý¾ÝaÖÐµÄbÎ»
 #define SETBIT(a, b)	(a = (a | (1 << b)))
-// æ¸…é›¶æ•°æ®aä¸­çš„bä½
+// ÇåÁãÊý¾ÝaÖÐµÄbÎ»
 #define CLRBIT(a, b)	(a = (a & (~(1 << b))))
 
-// æŽ¥æ”¶é˜Ÿåˆ—:æŽ¥æ”¶å¤©çº¿æ•°æ®
-typedef struct RxQueue
-{   
+// ½ÓÊÕ¶ÓÁÐ:½ÓÊÕ¿¨»úÊý¾Ý
+typedef struct CanRxQueue
+{
     CanRxMsg news[RX_DATA_BUFF_SIZE];
     u32 top;
     u32 bottom;
-    u32 empty;        //ä¸ä¸ºé›¶è¡¨ç¤ºä¸ºç©º
-    u32  full;        //ä¸ä¸ºé›¶è¡¨ç¤ºæ»¡  
-}RxQueue;
+    u32 empty;        //²»ÎªÁã±íÊ¾Îª¿Õ
+    u32  full;        //²»ÎªÁã±íÊ¾Âú
+}CanRxQueue;
+
+// ½ÓÊÕ¶ÓÁÐ:½ÓÊÕ¿¨»úÊý¾Ý
+typedef struct UartRxQueue
+{
+    char new[RX_DATA_BUFF_SIZE][50];
+    u32 top;
+    u32 bottom;
+    u32 empty;        //²»ÎªÁã±íÊ¾Îª¿Õ
+    u32  full;        //²»ÎªÁã±íÊ¾Âú
+}UartRxQueue;
 
 
-u8 initQueue (RxQueue * tRxQueue);
-u8 inQueue (RxQueue * const p_tQueue, CanRxMsg * const p_tNewNode);
-u8 outQueue (RxQueue * const p_tQueue, CanRxMsg * p_tReturnNode);
+u8 canInitQueue (CanRxQueue * tCanRxQueue);
+u8 canInQueue (CanRxQueue * const p_tQueue, CanRxMsg * const p_tNewNode);
+u8 canOutQueue (CanRxQueue * const p_tQueue, CanRxMsg * p_tReturnNode);
 
 
 #endif

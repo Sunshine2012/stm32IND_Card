@@ -167,12 +167,7 @@ void macUSART1_IRQHandler(void)
         {
             g_rx_buf[g_num + 1] = 0;
             /* 发布消息到消息队列 queue */
-            /*OSQPost ((OS_Q        *)&queue_uart,                            //消息变量指针
-                     (void        *)g_rx_buf,                               //要发送的数据的指针，将内存块首地址通过队列"发送出去"
-                     (OS_MSG_SIZE  )strlen ( (const char*)g_rx_buf ),       //数据字节大小
-                     (OS_OPT       )OS_OPT_POST_FIFO | OS_OPT_POST_ALL,     //先进先出和发布给全部任务的形式
-                     (OS_ERR      *)&err);                                  //返回错误类型
-						*/
+
         }
         // 当值不等时候，则继续接收下一个
         else
@@ -190,7 +185,7 @@ void macUSART1_IRQHandler(void)
 // 把接收到的数据存在一个数组缓冲区里面，当接收到的的值等于0XFF时，把值返回
 void macUSART4_IRQHandler(void)
 {
-    
+
     if(USART_GetITStatus(macUSART4,USART_IT_RXNE)!=RESET)
     {
         g_rx_buf[g_num] = USART_ReceiveData(macUSART4);
