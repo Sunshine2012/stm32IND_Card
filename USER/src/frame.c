@@ -3,7 +3,7 @@
 #include <WAV_C_xiexie.h>
 #include <WAV_C_quka.h>
 
-u32 g_uiaInitCardCount[5]    = {9999, 9998, 9997, 9996, 9995};    // 卡初始设置值,[0]为总卡数量,发1张卡,减1,[1~4]为每个卡机初始卡数量,发1张卡,减1.
+u32 g_uiaInitCardCount[5]    = {1000, 999, 999, 999, 999};    // 卡初始设置值,[0]为总卡数量,发1张卡,减1,[1~4]为每个卡机初始卡数量,发1张卡,减1.
 u32 g_uiaSpitCardCount[5]    = {0, 0, 0, 0, 0};    // 出卡数量,[0]为出卡总数量,发1张卡,加1,[1~4]为每个卡机发卡数量,发1张卡,加1.
 
 
@@ -17,10 +17,10 @@ CARD_MACHINE_POWER_ON_FREME      g_tCardMechinePowerOnFrame = {'<', '0', CARD_MA
 
 /* 状态信息(42H)帧             30字节 */
 CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame =    {'<', '0', 'B', '1','3',
-                                                                '0', '0', '4', '9', '9', '1',
-                                                                '0', '0', '4', '9', '9', '1',
-                                                                '0', '0', '4', '9', '9', '1',
-                                                                '0', '0', '4', '9', '9', '1',
+                                                                '0', '0', '9', '9', '9', '1',
+                                                                '0', '0', '9', '9', '9', '1',
+                                                                '0', '0', '9', '9', '9', '1',
+                                                                '0', '0', '9', '9', '9', '1',
                                                                 '>'};
 
 /* 已出卡信息(43H)帧            6字节 */
@@ -228,9 +228,10 @@ u8 * checkPriMsg (u8 ch)
                 {
 
                     g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换未字符,然后将数据发送出去
-                    //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                    g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
+                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
                     g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 0; // 按键发卡流程开始之后，再次按键不再响应
-                    myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                    //myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                     copyMenu ( mtRxMessage.Data[1], KEY_PRESS, 0, 8, 4 );
                     DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_KEY_PRESS ) );
                 }
@@ -248,7 +249,7 @@ u8 * checkPriMsg (u8 ch)
             break;
         case CARD_SPIT_NOTICE:                          // 出卡通知
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
-            dacSet ( DATA_quka, SOUND_LENGTH_quka );
+            //dacSet ( DATA_quka, SOUND_LENGTH_quka );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // 卡已被取走通知
@@ -307,7 +308,7 @@ u8 * checkPriMsg (u8 ch)
 
             g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
             printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
-            dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
+            //dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
             DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_TAKE_AWAY ) );
 
@@ -420,56 +421,78 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
     else if (PC_INIT_MECHINE <= type_frame <= PC_SET_CARD_NUM)  // 检测数据合法性
     {
         g_tP_RsctlFrame.RSCTL = ucNum;
-        //printf("%s\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+        printf("%s\r\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
 
         switch(type_frame)
         {
             case PC_INIT_MECHINE:               /* 初始化卡机信息(61H)帧 */
-                displayGB2312String (0, 0, argv, 1);
-                displayGB2312String (0, 2, "初始化", 0);
+                //displayGB2312String (0, 0, argv, 1);
+                //displayGB2312String (0, 2, "初始化", 0);
                 break;
             case PC_SPIT_OUT_CARD:              /* 出卡信息(62H)帧 */
-                displayGB2312String (0, 0, argv, 1);
-                displayGB2312String (0, 2, "出卡信息", 0);
-                if ( argv[3] <= '4' && argv[3] >= '1' )
+                //displayGB2312String (0, 0, argv, 1);
+                //displayGB2312String (0, 2, "出卡信息", 0);
+                switch (argv[3])
                 {
-                    myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                    dacSet ( DATA_quka, SOUND_LENGTH_quka );
-                    copyMenu ( argv[3] - '0', CARD_SPIT_NOTICE, 0, 8, 4 );
-                    copyStatusMsg ( argv[3] - '0', 0xfe, 0, 12, 4 ); //
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                        myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[argv[3] - '0']--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        copyMenu ( argv[3] - '0', CARD_SPIT_NOTICE, 0, 8, 4 );
+                        copyStatusMsg ( argv[3] - '0', 0xfe, 0, 12, 4 ); //
+                        break;
+                    case '5':
+                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[g_ucUpWorkingID]--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        copyMenu ( g_ucUpWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
+                        copyStatusMsg ( g_ucUpWorkingID, 0xfe, 0, 12, 4 ); //
+                        break;
+                    case '6':
+                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[g_ucDownWorkingID]--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        copyMenu ( g_ucDownWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
+                        copyStatusMsg ( g_ucDownWorkingID, 0xfe, 0, 12, 4 ); //
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case PC_BAD_CARD:                /* 坏卡信息(63H)帧 */
-                displayGB2312String (0, 0 ,argv, 1);
-                displayGB2312String (0, 2, "坏卡", 0);
+                //displayGB2312String (0, 0 ,argv, 1);
+                //displayGB2312String (0, 2, "坏卡", 0);
                 if ( argv[3] )
                 {
                     myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
                 }
                 break;
             case PC_QUERY_CARD_MECHINE:      /* 查询卡机状态(65H)帧 */
-                displayGB2312String (0, 0, argv, 1);
-                displayGB2312String (0, 2, "查询卡机", 0);
+                //displayGB2312String (0, 0, argv, 1);
+                //displayGB2312String (0, 2, "查询卡机", 0);
                 break;
             case PC_QUERY_CARD_CLIP:
-                displayGB2312String (0, 0, argv, 1);   /* 查询卡夹(66H)帧 */
-                displayGB2312String (0, 2, "查询卡夹", 0);
+                //displayGB2312String (0, 0, argv, 1);   /* 查询卡夹(66H)帧 */
+                //displayGB2312String (0, 2, "查询卡夹", 0);
                 break;
             case PC_SET_CARD_NUM:
-                displayGB2312String (0, 0, argv, 1);   /* 设置卡夹卡数(67H)帧 */
-                displayGB2312String (0, 2, "设置卡夹", 0);
+                //displayGB2312String (0, 0, argv, 1);   /* 设置卡夹卡数(67H)帧 */
+                //displayGB2312String (0, 2, "设置卡夹", 0);
                 break;
             case PC_GET_DIST:
                 //displayGB2312Char(0,0,argv,1);   /* 测距帧 */
                 //displayGB2312String (0, 2, "测距", 0);
                 break;
             case PC_CAR_HAS_COMING:
-                displayGB2312String (0, 0, argv, 1);   /* 车以来 */
-                displayGB2312String (0, 2, "车已来", 0);
+                //displayGB2312String (0, 0, argv, 1);   /* 车以来 */
+                //displayGB2312String (0, 2, "车已来", 0);
                 break;
             case PC_CAR_HAS_GONE:
-                displayGB2312String (0, 0, argv, 1);   /* 车以走 */
-                displayGB2312String (0, 2, "车已走", 0);
+                //displayGB2312String (0, 0, argv, 1);   /* 车以走 */
+                //displayGB2312String (0, 2, "车已走", 0);
                 break;
             default:
                 displayGB2312String (0, 0, argv, 1);   /* 无效信息 */

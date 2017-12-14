@@ -158,7 +158,7 @@ static struct io_port matrix_key_input[4] =
     { GPIOC, GPIO_Pin_6 }, { GPIOC, GPIO_Pin_7 },
 };
 
-void matrix_keyboard_init(void)
+void matrixKeyboardInit(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     unsigned char i;
@@ -187,7 +187,7 @@ void matrix_keyboard_init(void)
 
 
 
-u8 matrix_update_key(void)
+u8 matrixUpdateKey(void)
 {
     unsigned char i = 0;
     unsigned char j = 0;
@@ -229,7 +229,7 @@ u8 matrix_update_key(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
-                generalTIMInit();       // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
+                generalTIM3Init();       // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
                 return 0;
             }
         }

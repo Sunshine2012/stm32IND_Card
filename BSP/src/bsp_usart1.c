@@ -159,7 +159,7 @@ void USART1_nSendString(USART_TypeDef * pUSARTx,char *str,int n)
 ///重定向c库函数printf到串口，重定向后可使用printf函数
 int fputc(int ch, FILE *f)
 {
-    u32 i = 1000;
+    u32 i = 1000000;
     /* 等待发送完毕,即检测上次发送的数据 */
     while (USART_GetFlagStatus(macUSART1, USART_FLAG_TXE) == RESET)
     {

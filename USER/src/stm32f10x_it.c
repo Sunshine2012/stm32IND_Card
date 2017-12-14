@@ -168,7 +168,7 @@ void macUSART1_IRQHandler( void )
             g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
 
             /* 发布消息到消息队列 queue */
-            uartInQueue( &g_tUARTRxQueue, g_ucaUartRxMsg ); // 不考虑竞争,所以不设置自旋锁
+            uartInQueue( &g_tUARTRxQueue, g_rx_buf ); // 不考虑竞争,所以不设置自旋锁
         }
 
         // 当值不等时候，则继续接收下一个
@@ -206,7 +206,7 @@ void macUSART4_IRQHandler( void )
             g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
 
             /* 发布消息到消息队列 queue */
-            uartInitQueue( &g_tUARTRxQueue, g_ucaUartRxMsg ); // 不考虑竞争,所以不设置自旋锁
+            uartInitQueue( &g_tUARTRxQueue, g_rx_buf ); // 不考虑竞争,所以不设置自旋锁
         }
 
         // 当值不等时候，则继续接收下一个

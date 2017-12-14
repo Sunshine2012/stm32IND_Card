@@ -27,16 +27,17 @@ void bspInit( void )
 
     //USART4_Config ();         // 初始化 USART4
     DAC_init();
-    matrix_keyboard_init();
+    matrixKeyboardInit();
     lcdInit();
     canInitQueue( &g_tCanRxQueue );
     canInit();                                                                  // 初始化CAN通信
 
-    //generalTIMInit();
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置备用态
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置备用态
+
+    generalTIM2Init();          // 定时器初始化,2s定时上报状态信息
 
     IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为8s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 }
@@ -108,6 +109,7 @@ int main( void )
     u8 ret = 0;
 
     bspInit();
+
     doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
 
     while ( 1 )
@@ -124,12 +126,12 @@ int main( void )
 
         if ( 0 == ret )
         {
-            analyzeUartFrame( g_ucaUartRxMsg, strlen( g_ucaUartRxMsg ) );
+            analyzeUartFrame( g_ucaUartRxMsg, strlen( (const char *)g_ucaUartRxMsg ) );
         }
 
-        matrix_update_key();                                                    // 扫描按键
-        lcdRef();
-        IWDG_Feed();                                                            // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
+        matrixUpdateKey();          // 扫描按键
+        lcdRef();                   // 刷新显示
+        IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
     }
 }
 

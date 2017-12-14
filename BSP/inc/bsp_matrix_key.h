@@ -86,8 +86,8 @@ extern unsigned char g_ucKeyContinu;     // 连续按键的标志
 
 
 /* 4*4矩阵键盘 */
-void matrix_keyboard_init(void);
-u8 matrix_update_key(void);
+void matrixKeyboardInit(void);
+u8 matrixUpdateKey(void);
 extern unsigned char matrix_key[4][4];
 
 #endif

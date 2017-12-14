@@ -8,53 +8,63 @@
 /**************通用定时器TIM参数定义，只限TIM2、3、4、5************/
 // 当需要哪个定时器的时候，只需要把下面的宏定义改成1即可
 #define GENERAL_TIM2    1
-#define GENERAL_TIM3    0
-#define GENERAL_TIM4    0
-#define GENERAL_TIM5    0
+#define GENERAL_TIM3    1
+#define GENERAL_TIM4    1
+#define GENERAL_TIM5    1
 
 #if  GENERAL_TIM2
-#define            GENERAL_TIM                   TIM2
-#define            GENERAL_TIM_APBxClock_FUN     RCC_APB1PeriphClockCmd
-#define            GENERAL_TIM_CLK               RCC_APB1Periph_TIM2
-#define            GENERAL_TIM_Period            (1000-1)
-#define            GENERAL_TIM_Prescaler         71
-#define            GENERAL_TIM_IRQ               TIM2_IRQn
-#define            GENERAL_TIM_IRQHandler        TIM2_IRQHandler
+#define            GENERAL_TIM2                   TIM2
+#define            GENERAL_TIM2_APBxClock_FUN     RCC_APB1PeriphClockCmd
+#define            GENERAL_TIM2_CLK               RCC_APB1Periph_TIM2
+#define            GENERAL_TIM2_Period            (50000-1)
+#define            GENERAL_TIM2_Prescaler         2840
+#define            GENERAL_TIM2_IRQ               TIM2_IRQn
+#define            GENERAL_TIM2_IRQHandler        TIM2_IRQHandler
 
-#elif  GENERAL_TIM3
-#define            GENERAL_TIM                   TIM3
-#define            GENERAL_TIM_APBxClock_FUN     RCC_APB1PeriphClockCmd
-#define            GENERAL_TIM_CLK               RCC_APB1Periph_TIM3
-#define            GENERAL_TIM_Period            (1000-1)
-#define            GENERAL_TIM_Prescaler         71
-#define            GENERAL_TIM_IRQ               TIM3_IRQn
-#define            GENERAL_TIM_IRQHandler        TIM3_IRQHandler
+#endif
 
-#elif   GENERAL_TIM4
-#define            GENERAL_TIM                   TIM4
-#define            GENERAL_TIM_APBxClock_FUN     RCC_APB1PeriphClockCmd
-#define            GENERAL_TIM_CLK               RCC_APB1Periph_TIM4
-#define            GENERAL_TIM_Period            (1000-1)
-#define            GENERAL_TIM_Prescaler         71
-#define            GENERAL_TIM_IRQ               TIM4_IRQn
-#define            GENERAL_TIM_IRQHandler        TIM4_IRQHandler
+#if  GENERAL_TIM3
+#define            GENERAL_TIM3                   TIM3
+#define            GENERAL_TIM3_APBxClock_FUN     RCC_APB1PeriphClockCmd
+#define            GENERAL_TIM3_CLK               RCC_APB1Periph_TIM3
+#define            GENERAL_TIM3_Period            (1000-1)
+#define            GENERAL_TIM3_Prescaler         71
+#define            GENERAL_TIM3_IRQ               TIM3_IRQn
+#define            GENERAL_TIM3_IRQHandler        TIM3_IRQHandler
 
-#elif   GENERAL_TIM5
-#define            GENERAL_TIM                   TIM5
-#define            GENERAL_TIM_APBxClock_FUN     RCC_APB1PeriphClockCmd
-#define            GENERAL_TIM_CLK               RCC_APB1Periph_TIM5
-#define            GENERAL_TIM_Period            (1000-1)
-#define            GENERAL_TIM_Prescaler         71
-#define            GENERAL_TIM_IRQ               TIM5_IRQn
-#define            GENERAL_TIM_IRQHandler        TIM5_IRQHandler
+#endif
+
+#if   GENERAL_TIM4
+#define            GENERAL_TIM4                   TIM4
+#define            GENERAL_TIM4_APBxClock_FUN     RCC_APB1PeriphClockCmd
+#define            GENERAL_TIM4_CLK               RCC_APB1Periph_TIM4
+#define            GENERAL_TIM4_Period            (1000-1)
+#define            GENERAL_TIM4_Prescaler         71
+#define            GENERAL_TIM4_IRQ               TIM4_IRQn
+#define            GENERAL_TIM4_IRQHandler        TIM4_IRQHandler
+
+#endif
+
+#if   GENERAL_TIM5
+#define            GENERAL_TIM5                   TIM5
+#define            GENERAL_TIM5_APBxClock_FUN     RCC_APB1PeriphClockCmd
+#define            GENERAL_TIM5_CLK               RCC_APB1Periph_TIM5
+#define            GENERAL_TIM5_Period            (1000-1)
+#define            GENERAL_TIM5_Prescaler         71
+#define            GENERAL_TIM5_IRQ               TIM5_IRQn
+#define            GENERAL_TIM5_IRQHandler        TIM5_IRQHandler
 
 #endif
 /**************************函数声明********************************/
 
-extern uint32_t time; // ms 计时变量
+extern uint32_t time_0;     // ms 计时变量
+extern uint32_t timeMsg;    // ms 计时变量
 
 
-void generalTIMInit(void);
+void generalTIM2Init(void);
+void generalTIM3Init(void);
+void generalTIM4Init(void);
+void generalTIM5Init(void);
 
 
 #endif  /* __BSP_GENERALTIME_H */
