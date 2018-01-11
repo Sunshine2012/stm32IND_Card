@@ -229,7 +229,8 @@ u8 matrixUpdateKey(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
-                generalTIM3Init();       // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
+                TIM_Cmd(GENERAL_TIM3, ENABLE); // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
+                time_0 = 0;
                 return 0;
             }
         }

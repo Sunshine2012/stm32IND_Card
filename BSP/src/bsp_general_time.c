@@ -1,5 +1,5 @@
-#include "includes.h"
-#include "bsp_GeneralTim.h"
+#include <includes.h>
+#include "bsp_general_time.h"
 
 uint32_t time_0 = 0; // ms 计时变量
 uint32_t timeMsg = 0; // ms 计时变量
@@ -10,7 +10,7 @@ uint32_t timeMsg = 0; // ms 计时变量
   */
 void  GENERAL_TIM2_IRQHandler (void)
 {
-    // 1ms中断一次
+    // 2中断一次
     if ( TIM_GetITStatus( GENERAL_TIM2, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM2 , TIM_FLAG_Update);       // 清中断

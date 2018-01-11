@@ -1,5 +1,6 @@
 #include <includes.h>
 
+u8 g_ucConnectMode      = 1;            // 1为联机模式,其他为单机测试模式
 u8 g_ucIsUpdateMenu     = 0;            // 更新显示
 u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
 u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
@@ -14,16 +15,23 @@ u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
 u8 g_ucaDeviceIsSTBY[4] = {1, 1, 1, 1}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 
+
 CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
 CanRxMsg  g_tCanRxMsg = {0};          // CAN数据出队元素
 u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
 
+//要写入到STM32 FLASH的字符串数组
+const u8 TEXT_Buffer[]={1};
+
 void bspInit( void )
 {
     delayInit();                                                                // 定时函数
     LED_Init();                                                                 // 初始化 LED
-    USART1_Config();                                                            // 初始化 USART1
+    antGPIOInit();  // 天线切换引脚初始化
+
+    uartInitQueue( &g_tUARTRxQueue);                                            // 初始化 USART1
+    USART1_Config();
 
     //USART4_Config ();         // 初始化 USART4
     DAC_init();
@@ -38,8 +46,10 @@ void bspInit( void )
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置备用态
 
     generalTIM2Init();          // 定时器初始化,2s定时上报状态信息
+    generalTIM3Init();          // 定时器初始化,30s定时无按键按下,退回到主界面
+    //I2C_Configuration();
 
-    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为8s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
+    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 }
 void lcdRef()
 {
@@ -99,6 +109,10 @@ void lcdRef()
                 doShowDebugTwo( DLG_DEBUG_TWO, 5, NULL );
                 break;
 
+            case DLG_CONNETCT_SET:
+                doShowConnectModeSet (DLG_CONNETCT_SET, 5, NULL);
+                break;
+
             default:
                 break;
         }
@@ -111,6 +125,10 @@ int main( void )
     bspInit();
 
     doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
+
+    STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
+
+    g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
 
     while ( 1 )
     {

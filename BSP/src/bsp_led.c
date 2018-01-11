@@ -1,4 +1,4 @@
-#include "bsp_led.h"   
+#include "bsp_led.h"
 
 
 
@@ -12,28 +12,30 @@ static void                         LED_GPIO_Config                  ( void );
   * @retval 无
   */
 static void LED_GPIO_Config ( void )
-{		
+{
 	/*定义一个GPIO_InitTypeDef类型的结构体*/
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 
 	/* 配置 LED1 引脚 */
-	RCC_APB2PeriphClockCmd ( macLED1_GPIO_CLK, ENABLE ); 															   
-	GPIO_InitStructure.GPIO_Pin = macLED1_GPIO_PIN;	
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-	GPIO_Init ( macLED1_GPIO_PORT, & GPIO_InitStructure );	
+	RCC_APB2PeriphClockCmd ( macLED1_GPIO_CLK, ENABLE );
+	GPIO_InitStructure.GPIO_Pin = macLED1_GPIO_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init ( macLED1_GPIO_PORT, & GPIO_InitStructure );
 
 	/* 配置 LED2 引脚 */
-	RCC_APB2PeriphClockCmd ( macLED2_GPIO_CLK, ENABLE ); 															   
-	GPIO_InitStructure.GPIO_Pin = macLED2_GPIO_PIN;	
-	GPIO_Init ( macLED2_GPIO_PORT, & GPIO_InitStructure );	
+	RCC_APB2PeriphClockCmd ( macLED2_GPIO_CLK, ENABLE );
+	GPIO_InitStructure.GPIO_Pin = macLED2_GPIO_PIN;
+	GPIO_Init ( macLED2_GPIO_PORT, & GPIO_InitStructure );
 
 	/* 配置 LED3 引脚 */
-	RCC_APB2PeriphClockCmd ( macLED3_GPIO_CLK, ENABLE ); 															   
-	GPIO_InitStructure.GPIO_Pin = macLED3_GPIO_PIN;	
-	GPIO_Init ( macLED3_GPIO_PORT, & GPIO_InitStructure );		
-	  		
+	RCC_APB2PeriphClockCmd ( macLED3_GPIO_CLK, ENABLE );
+	GPIO_InitStructure.GPIO_Pin = macLED3_GPIO_PIN;
+	GPIO_Init ( macLED3_GPIO_PORT, & GPIO_InitStructure );
+
+
+
 }
 
 
@@ -45,13 +47,38 @@ static void LED_GPIO_Config ( void )
 void LED_Init ( void )
 {
     LED_GPIO_Config ();
-	
+
 	macLED1_ON();
 	macLED2_ON();
 	macLED3_ON();
-	
+
 }
 
+void antGPIOInit (void)     // 天线切换引脚初始化
+{
+	/*定义一个GPIO_InitTypeDef类型的结构体*/
+	GPIO_InitTypeDef GPIO_InitStructure;
 
+
+	/* 配置引脚 */
+	RCC_APB2PeriphClockCmd ( RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOC, ENABLE );
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 ;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init ( GPIOA, & GPIO_InitStructure );
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init ( GPIOC, & GPIO_InitStructure );
+
+    //macANT_IO0_ON();
+    macANT_IO1_OFF();
+    macANT_IO2_OFF();
+    macANT_IO3_OFF();
+    macANT_IO4_OFF();
+
+}
 
 /*********************************************END OF FILE**********************/

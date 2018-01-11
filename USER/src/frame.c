@@ -111,6 +111,48 @@ const Print_msg g_taShowFaultCode_msg[] = {
                             {0xff,NULL}
                         };
 
+void antSwitch(u8 id)
+{
+    switch (id)
+        {
+        case 0:
+            macANT_IO1_OFF();
+            macANT_IO2_OFF();
+            macANT_IO3_OFF();
+            macANT_IO4_OFF();
+        case 1:
+            macANT_IO1_ON();
+            macANT_IO2_OFF();
+            macANT_IO3_OFF();
+            macANT_IO4_OFF();
+            break;
+        case 2:
+            macANT_IO1_ON();
+            macANT_IO2_ON();
+            macANT_IO3_OFF();
+            macANT_IO4_OFF();
+            break;
+        case 3:
+            macANT_IO1_ON();
+            macANT_IO2_ON();
+            macANT_IO3_ON();
+            macANT_IO4_OFF();
+            break;
+        case 4:
+            macANT_IO1_ON();
+            macANT_IO2_ON();
+            macANT_IO3_ON();
+            macANT_IO4_ON();
+            break;
+        default:
+            macANT_IO1_OFF();
+            macANT_IO2_OFF();
+            macANT_IO3_OFF();
+            macANT_IO4_OFF();
+            break;
+        }
+}
+
 // 复制要显示的菜单数据到数组中
 void copyMenu (u8 num, u8 cmd, u8 values, u8 addr, u8 count)
 {
@@ -227,11 +269,18 @@ u8 * checkPriMsg (u8 ch)
                 if ( mtRxMessage.Data[4] == 0x10 ) // 未进入发卡流程,且有卡
                 {
 
-                    g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换未字符,然后将数据发送出去
+                    g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换为字符,然后将数据发送出去
                     g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
-                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                    if ( g_ucConnectMode == 1 )
+                    {
+                        printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                        antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
+                    }
+                    else
+                    {
+                        myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                    }
                     g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 0; // 按键发卡流程开始之后，再次按键不再响应
-                    //myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                     copyMenu ( mtRxMessage.Data[1], KEY_PRESS, 0, 8, 4 );
                     DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_KEY_PRESS ) );
                 }
@@ -240,6 +289,7 @@ u8 * checkPriMsg (u8 ch)
                     myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
                     g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 1;
                 }
+
             }
             else
             {
@@ -249,7 +299,7 @@ u8 * checkPriMsg (u8 ch)
             break;
         case CARD_SPIT_NOTICE:                          // 出卡通知
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
-            //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+            dacSet ( DATA_quka, SOUND_LENGTH_quka );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // 卡已被取走通知
@@ -308,7 +358,7 @@ u8 * checkPriMsg (u8 ch)
 
             g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
             printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
-            //dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
+            dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
             DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_TAKE_AWAY ) );
 
@@ -440,21 +490,21 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                     case '4':
                         myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[argv[3] - '0']--;
-                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( argv[3] - '0', CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( argv[3] - '0', 0xfe, 0, 12, 4 ); //
                         break;
                     case '5':
                         myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[g_ucUpWorkingID]--;
-                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( g_ucUpWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucUpWorkingID, 0xfe, 0, 12, 4 ); //
                         break;
                     case '6':
                         myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[g_ucDownWorkingID]--;
-                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( g_ucDownWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucDownWorkingID, 0xfe, 0, 12, 4 ); //
                         break;
@@ -493,6 +543,9 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
             case PC_CAR_HAS_GONE:
                 //displayGB2312String (0, 0, argv, 1);   /* 车以走 */
                 //displayGB2312String (0, 2, "车已走", 0);
+                break;
+           case MECHINE_CODE_VERSION:
+                printf ("the code version %s,%s\r\n", __DATE__,__TIME__);
                 break;
             default:
                 displayGB2312String (0, 0, argv, 1);   /* 无效信息 */

@@ -31,6 +31,7 @@ typedef enum FRAME
     PC_SET_CARD_NUM         = 'g',      /* 设置卡夹卡数(67H)帧          8字节 */
     PC_CAR_HAS_COMING       = 'h',      /* 车以来信息 */
     PC_CAR_HAS_GONE         = 'i',      /* 车已走信息 */
+    MECHINE_CODE_VERSION    = 'v',      /* 版本 */
 
     PC_GET_DIST             = 't',      /* 测距 */
     FRAME_END               = '>',      /* 帧结束 */

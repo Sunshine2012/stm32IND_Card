@@ -83,8 +83,8 @@
 *********************************************************************************************************
 */
 
-extern u8 g_ucIsUpdateMenu;     // 更新显示
-
+extern u8 g_ucConnectMode;       // 1为联机模式,其他为单机测试模式
+extern u8 g_ucIsUpdateMenu;      // 更新显示
 extern u8 g_ucCurDlg;            // 当前显示的菜单号
 extern u8 g_ucHighLightRow;      // 当前显示的菜单需要高亮的行
 extern u8 g_ucCurID;             // 当前通信设备的号,在设置设备号时候使用

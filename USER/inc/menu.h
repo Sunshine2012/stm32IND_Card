@@ -17,6 +17,8 @@ typedef enum DLG_ID
     DLG_STATUS_ONE               = 21,                 /*  */
     DLG_STATUS_TWO               = 22,                 /*  */
 
+    DLG_CONNETCT_SET             = 23,                 /*  */
+
     DLG_CARD_COUNT_SET           = 30,                 /*  */
 
     DLG_DEBUG_MAIN               = 40,                 /*  */
@@ -42,6 +44,7 @@ typedef struct Dlg
 void doShowStatusMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
 void doShowMainMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
 void doShowCardCountSet (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
+void doShowConnectModeSet (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
 void doShowStatusOne (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
 void doShowStatusTwo (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
 void doShowIdSetMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
