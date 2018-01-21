@@ -10,7 +10,7 @@ u32 g_uiaSpitCardCount[5]    = {0, 0, 0, 0, 0};    // ³ö¿¨ÊýÁ¿,[0]Îª³ö¿¨×ÜÊýÁ¿,·
 u8 g_ucSerNum = '0';  // Ö¡ÐòºÅ   È«¾Ö
 
 RSCTL_FREME g_tP_RsctlFrame = {'<','0','0','>'};        // ÕýÓ¦´ðÖ¡
-RSCTL_FREME g_tN_sctlFrame =  {'<','1','0','>'};        // ¸ºÓ¦´ðÖ¡
+RSCTL_FREME g_tN_RsctlFrame = {'<','1','0','>'};        // ¸ºÓ¦´ðÖ¡
 
 /* ¿¨»úÉÏµçÐÅÏ¢(41H)Ö¡          4×Ö½Ú */
 CARD_MACHINE_POWER_ON_FREME      g_tCardMechinePowerOnFrame = {'<', '0', CARD_MACHINE_POWER_ON, '>'};;
@@ -299,8 +299,12 @@ u8 * checkPriMsg (u8 ch)
             break;
         case CARD_SPIT_NOTICE:                          // ³ö¿¨Í¨Öª
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
-            dacSet ( DATA_quka, SOUND_LENGTH_quka );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
+            if (mtRxMessage.Data[4] == 0x12)
+            {
+                dacSet ( DATA_quka, SOUND_LENGTH_quka );
+            }
+            printf ("%s\n", (char *)&g_tCardSpitOutFrame);
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // ¿¨ÒÑ±»È¡×ßÍ¨Öª
             g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 1;  // ±íÃ÷¿¨ÒÑ¾­±»È¡×ß,ÖÃÎ»×´Ì¬
@@ -356,11 +360,14 @@ u8 * checkPriMsg (u8 ch)
                     break;
             }
 
-            g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
+            g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
+            g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
             printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
             dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
-            DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_TAKE_AWAY ) );
+            //DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_TAKE_AWAY ) );
+
+            antSwitch( 0 ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß,ÊÍ·ÅÌìÏß
 
             g_ucIsUpdateMenu    = 1;                    // ¸üÐÂ½çÃæ
             break;
@@ -471,7 +478,7 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
     else if (PC_INIT_MECHINE <= type_frame <= PC_SET_CARD_NUM)  // ¼ì²âÊý¾ÝºÏ·¨ÐÔ
     {
         g_tP_RsctlFrame.RSCTL = ucNum;
-        printf("%s\r\n",(char *)&g_tP_RsctlFrame);   //·¢ËÍÕýÓ¦´ðÖ¡
+        printf("%s\n",(char *)&g_tP_RsctlFrame);   //·¢ËÍÕýÓ¦´ðÖ¡
 
         switch(type_frame)
         {
@@ -480,8 +487,6 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                 //displayGB2312String (0, 2, "³õÊ¼»¯", 0);
                 break;
             case PC_SPIT_OUT_CARD:              /* ³ö¿¨ÐÅÏ¢(62H)Ö¡ */
-                //displayGB2312String (0, 0, argv, 1);
-                //displayGB2312String (0, 2, "³ö¿¨ÐÅÏ¢", 0);
                 switch (argv[3])
                 {
                     case '1':
@@ -490,21 +495,18 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                     case '4':
                         myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[argv[3] - '0']--;
-                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( argv[3] - '0', CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( argv[3] - '0', 0xfe, 0, 12, 4 ); //
                         break;
                     case '5':
                         myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[g_ucUpWorkingID]--;
-                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( g_ucUpWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucUpWorkingID, 0xfe, 0, 12, 4 ); //
                         break;
                     case '6':
                         myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_uiaInitCardCount[g_ucDownWorkingID]--;
-                        dacSet ( DATA_quka, SOUND_LENGTH_quka );
                         copyMenu ( g_ucDownWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucDownWorkingID, 0xfe, 0, 12, 4 ); //
                         break;
@@ -512,13 +514,119 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                         break;
                 }
                 break;
-            case PC_BAD_CARD:                /* »µ¿¨ÐÅÏ¢(63H)Ö¡ */
-                //displayGB2312String (0, 0 ,argv, 1);
-                //displayGB2312String (0, 2, "»µ¿¨", 0);
-                if ( argv[3] )
+            case PC_BAD_CARD:                   /* »µ¿¨ÐÅÏ¢(63H)Ö¡ */
+
+                g_ucaDeviceIsSTBY[0] = 1;
+                g_ucaDeviceIsSTBY[1] = 1;
+                g_ucaDeviceIsSTBY[2] = 1;
+                g_ucaDeviceIsSTBY[3] = 1;
+
+                switch (argv[3])
                 {
-                    myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                        myCANTransmit ( gt_TxMessage, argv[3] - '0', 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[argv[3] - '0']--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        //copyMenu ( argv[3] - '0', CARD_SPIT_NOTICE, 0, 8, 4 );
+                        //copyStatusMsg ( argv[3] - '0', 0xfe, 0, 12, 4 ); //
+
+                        g_tCardKeyPressFrame.MECHINE_ID = argv[3] + '0';      // ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
+                        g_tCardKeyPressFrame.CARD_MECHINE = argv[3] < 3 ? '1' : '2';        //
+                        printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                        antSwitch( argv[3] ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
+                        break;
+                    case '5':
+                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[g_ucUpWorkingID]--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        //copyMenu ( g_ucUpWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
+                        //copyStatusMsg ( g_ucUpWorkingID, 0xfe, 0, 12, 4 ); //
+
+                        if ( g_ucUpWorkingID == 1)
+                        {
+                            if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // ÎÞ¹ÊÕÏ,ÇÒÍ¨ÐÅÕý³£
+                            {
+                                g_ucaMechineExist[0] = 0;
+                                g_ucaMechineExist[1] = 0;
+                                g_ucUpWorkingID     = 2;
+                                g_ucUpBackingID     = 1;
+                                myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // ÉèÖÃ¹¤×÷Ì¬
+
+                                g_tCardKeyPressFrame.MECHINE_ID = 2 + '0';      // ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
+                                g_tCardKeyPressFrame.CARD_MECHINE = '1';        //
+                                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                antSwitch( 2 ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
+                            }
+                        }
+                        else
+                        {
+                            if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // ÎÞ¹ÊÕÏ,ÇÒÍ¨ÐÅÕý³£
+                            {
+                                g_ucaMechineExist[0] = 0;
+                                g_ucaMechineExist[1] = 0;
+                                g_ucUpWorkingID     = 1;
+                                g_ucUpBackingID     = 2;
+                                myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // ÉèÖÃ¹¤×÷Ì¬
+
+                                g_tCardKeyPressFrame.MECHINE_ID = 1 + '0';      // ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
+                                g_tCardKeyPressFrame.CARD_MECHINE = '1';        //
+                                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                antSwitch( 1 ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
+
+                            }
+                        }
+
+                        break;
+                    case '6':
+                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                        g_uiaInitCardCount[g_ucDownWorkingID]--;
+                        //dacSet ( DATA_quka, SOUND_LENGTH_quka );
+                        //copyMenu ( g_ucDownWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
+                        //copyStatusMsg ( g_ucDownWorkingID, 0xfe, 0, 12, 4 ); //
+                        if ( g_ucDownWorkingID == 3)
+                        {
+                            if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // ÎÞ¹ÊÕÏ,ÇÒÍ¨ÐÅÕý³£
+                            {
+                                g_ucaMechineExist[2] = 0;
+                                g_ucaMechineExist[3] = 0;
+                                g_ucDownWorkingID   = 4;
+                                g_ucDownBackingID   = 3;
+                                myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // ÉèÖÃ¹¤×÷Ì¬
+
+                                g_tCardKeyPressFrame.MECHINE_ID = 4 + '0';		// ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
+                                g_tCardKeyPressFrame.CARD_MECHINE = '2';        //
+                                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                antSwitch( 4 ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
+                            }
+                        }
+                        else
+                        {
+                            if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // ÎÞ¹ÊÕÏ,ÇÒÍ¨ÐÅÕý³£
+                            {
+                                g_ucaMechineExist[2] = 0;
+                                g_ucaMechineExist[3] = 0;
+                                g_ucDownWorkingID   = 3;
+                                g_ucDownBackingID   = 4;
+                                myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // ÉèÖÃ¹¤×÷Ì¬
+
+                                g_tCardKeyPressFrame.MECHINE_ID = 3 + '0';      // ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
+                                g_tCardKeyPressFrame.CARD_MECHINE = '2';        //
+                                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                antSwitch( 3 ); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
+
                 break;
             case PC_QUERY_CARD_MECHINE:      /* ²éÑ¯¿¨»ú×´Ì¬(65H)Ö¡ */
                 //displayGB2312String (0, 0, argv, 1);

@@ -585,7 +585,7 @@ void doShowWorkingSet (u8 dlg_id, u8 isNotRow, void * p_parm)
     u8 master4[] = "3:备用    4:工作";
 
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
-
+    //g_dlg[dlgId].highLightRow = 1;
     if(g_ucUpWorkingID == 1 && g_ucUpBackingID == 2)
     {
         for (i = 0; i < 16; i++)

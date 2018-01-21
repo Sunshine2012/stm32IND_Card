@@ -130,6 +130,8 @@ int main( void )
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
 
+    printf ("%s\r\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
+
     while ( 1 )
     {
         ret = canOutQueue( &g_tCanRxQueue, &g_tCanRxMsg );

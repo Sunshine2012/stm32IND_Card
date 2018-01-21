@@ -31,10 +31,12 @@ void  GENERAL_TIM2_IRQHandler (void)
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[1] = g_uiaInitCardCount[4] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[2] = g_uiaInitCardCount[4] % 10 + '0';
 
-        //timeMsg++;
+        timeMsg++;
+        g_uiSerNum++;
+        g_tCardMechineStatusFrame.RSCTL = g_uiSerNum % 10 + '0';
         //if (timeMsg == 2)    // 2秒上报一次系统消息
         {
-            timeMsg = 0;
+            //timeMsg = 0;
             printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
         }
     }
