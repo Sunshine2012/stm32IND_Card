@@ -2,7 +2,8 @@
 
 CanTxMsg gt_TxMessage;      // CAN发送数据缓存
 
-unsigned int g_uiSerNum = 0; // 帧序号,全局,卡机与主机之间的帧序号
+u32 g_uiSerNum = 0; // 帧序号,全局,卡机与主机之间的帧序号
+u32 g_uiSerNumPC = 0; // 帧序号,全局,PC与主机之间的帧序号
 
 static void CAN_GPIO_Config(void)
 {

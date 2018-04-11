@@ -10,11 +10,14 @@ u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
 u8 g_ucDownBackingID    = 4;            // 下工位备用卡机号
-u8 g_ucaCardIsReady[4]  = {1, 1, 1, 1}; // 卡就绪
+u8 g_ucaCardIsReady[4]  = {0, 0, 0, 0}; // 卡就绪
 u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
 u8 g_ucaDeviceIsSTBY[4] = {1, 1, 1, 1}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
+u8 g_ucRepeatKeyMechine = 0;             // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
+u8 g_ucBadCardCount   = 0;               // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 
+const u8 g_BadCardCount   = 0;
 
 CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
@@ -22,7 +25,7 @@ CanRxMsg  g_tCanRxMsg = {0};          // CAN数据出队元素
 u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
 
 //要写入到STM32 FLASH的字符串数组
-const u8 TEXT_Buffer[]={1};
+//const u8 TEXT_Buffer[]={1};
 
 void bspInit( void )
 {

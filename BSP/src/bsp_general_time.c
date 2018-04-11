@@ -1,8 +1,10 @@
 #include <includes.h>
 #include "bsp_general_time.h"
 
-uint32_t time_0 = 0; // ms 计时变量
-uint32_t timeMsg = 0; // ms 计时变量
+uint32_t g_time = 0;  // ms 计时变量
+uint32_t g_timeMsg = 0; // ms 计时变量
+uint32_t g_timePressKeyDelay = 0; // ms 卡机就绪等待时间,在验卡失败之后,使得,然后再次上按键状态
+
 /**
   * @brief  This function handles TIM interrupt request.
   * @param  None
@@ -17,23 +19,27 @@ void  GENERAL_TIM2_IRQHandler (void)
         g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[0] = g_uiaInitCardCount[1] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[1] = g_uiaInitCardCount[1] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[2] = g_uiaInitCardCount[1] % 10 + '0';
-
+        g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[0] = g_uiaInitCardCount[2] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[1] = g_uiaInitCardCount[2] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[2] = g_uiaInitCardCount[2] % 10 + '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[0] = g_uiaInitCardCount[3] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[1] = g_uiaInitCardCount[3] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[2] = g_uiaInitCardCount[3] % 10 + '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[0] = g_uiaInitCardCount[4] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[1] = g_uiaInitCardCount[4] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[2] = g_uiaInitCardCount[4] % 10 + '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
 
-        timeMsg++;
-        g_uiSerNum++;
-        g_tCardMechineStatusFrame.RSCTL = g_uiSerNum % 10 + '0';
+        g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+        g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
+        g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+
         //if (timeMsg == 2)    // 2秒上报一次系统消息
         {
             //timeMsg = 0;
@@ -48,18 +54,38 @@ void  GENERAL_TIM2_IRQHandler (void)
   */
 void  GENERAL_TIM3_IRQHandler (void)
 {
-    // 1ms中断一次
+    // 10ms中断一次
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
-        time_0++;
-        if (time_0 == 30000)
+        /*
+        if (g_time == 0 && g_ucKeyValues == KEY_NUL)
         {
-            time_0 = 0;
+            g_time = 3000;
             g_ucKeyValues = KEY_QUIT;                                   // 30秒钟将屏幕回到主显示
             LCD_BAK_SET;
-            TIM_ITConfig(GENERAL_TIM3,TIM_IT_Update,DISABLE);            // 关闭中断
+            //TIM_ITConfig(GENERAL_TIM3,TIM_IT_Update,DISABLE);         // 关闭中断
         }
+        */
+        if (g_timePressKeyDelay == 0 && g_ucRepeatKeyMechine != 0)
+        {
+            if (g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] == 1 )           // 卡就绪
+            {
+                g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] = 0;
+                antSwitch( g_ucRepeatKeyMechine );                          //  切换天线
+                g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+                g_tCardKeyPressFrame.CARD_MECHINE = g_ucRepeatKeyMechine <= 2 ? '1' : '2';
+                g_tCardKeyPressFrame.MECHINE_ID = g_ucRepeatKeyMechine + '0';
+                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                g_ucRepeatKeyMechine = 0;
+            }
+            else if (g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] == 0)          // 卡未就绪
+            {
+                g_timePressKeyDelay = 500;
+            }
+        }
+        g_time--;
+        g_timePressKeyDelay--;
     }
 }
 

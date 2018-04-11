@@ -40,11 +40,11 @@ typedef enum FRAME
 // Ó¦´ðÐÅÏ¢Ö¡ 4×Ö½Ú
 typedef struct RSCTL_FREME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* ÀàÐÍ£ºÕý(30H), ¸º(31H) */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }RSCTL_FREME;
 
 ///====================================
@@ -52,11 +52,11 @@ typedef struct RSCTL_FREME
 // ¿¨»úÉÏµçÐÅÏ¢Ö¡ 4×Ö½Ú
 typedef struct CARD_MACHINE_POWER_ON_FREME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }CARD_MACHINE_POWER_ON_FREME;
 
 // µ¥¿¨¼Ð×´Ì¬ÐÅÏ¢ 6×Ö½Ú
@@ -65,14 +65,14 @@ typedef struct CARD_SPIT_STATUES
     u8 status;                  /* ¿¨»ú×´Ì¬ */
     u8 spitIsExist;             /* ¿¨»úÊÇ·ñ×°ÉÏ */
     u8 cardNum[3];              /* ¿¨»úÖÐ¿¨¼ÆÊýÖµ£¬°üº¬ÌìÏßÉÏµÄ¿¨ */
-    u8 antHasCard;              /* ¹¤Î»ÐÅÏ¢ */
+    u8 antHasCard;              /* ÌìÏßÊÇ·ñÓÐ¿¨ */
 }CARD_SPIT_STATUES;
 
 
 // ×´Ì¬ÐÅÏ¢Ö¡ 30×Ö½Ú
 typedef struct CARD_MACHINE_STATUES_FRAME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 UP_SPIT_IS_OK;       /* ÉÏ¹¤Î»µ±Ç°¾ÍÐ÷¿¨»ú */
@@ -81,35 +81,35 @@ typedef struct CARD_MACHINE_STATUES_FRAME
     CARD_SPIT_STATUES CARD_MECHINE2;/* ¹¤Î»ÐÅÏ¢ */
     CARD_SPIT_STATUES CARD_MECHINE3;/* ¹¤Î»ÐÅÏ¢ */
     CARD_SPIT_STATUES CARD_MECHINE4;/* ¹¤Î»ÐÅÏ¢ */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }CARD_MACHINE_STATUES_FRAME;
 
 
 // 6×Ö½Ú
 typedef struct CARD_MECHINE_TO_PC_FRAME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 CARD_MECHINE;        /* ¹¤Î»ÐÅÏ¢ */
     u8 MECHINE_ID;          /* ¿¨»ú±àºÅ */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }CARD_MECHINE_TO_PC_FRAME;
 
 // ÉÏ±¨¿¨¼ÐÐòÁÐºÅ×´Ì¬Ö¡ 29
 typedef struct CARD_REPORT_SPIT_STATUES_FRAME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 CARD_SPIT1[8];       /* 1#¿¨»úÄÚ¿¨¼Ð±àºÅ */
     u8 CARD_SPIT2[8];       /* 2#¿¨»úÄÚ¿¨¼Ð±àºÅ */
     u8 CARD_SPIT3[8];       /* 3#¿¨»úÄÚ¿¨¼Ð±àºÅ */
     u8 CARD_SPIT4[8];       /* 4#¿¨»úÄÚ¿¨¼Ð±àºÅ */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }CARD_REPORT_SPIT_STATUES_FRAME;
 
 ///====================================
@@ -117,36 +117,36 @@ typedef struct CARD_REPORT_SPIT_STATUES_FRAME
 // ³õÊ¼»¯Ö¡ 20×Ö½Ú
 typedef struct PC_TO_CARD_INIT_FREME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 CARD_NUM[3];         /* ¿¨¼Ð×î´ó¼ÆÊý */
     u8 DATE[14];            /* Ê±¼ä */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }PC_TO_CARD_INIT_FREME;
 
 // 5×Ö½Ú
 typedef struct PC_TO_CARD_MECHINE_FRAME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 DATA;                /* Êý¾ÝÓò */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }PC_TO_CARD_MECHINE_FRAME;
 
 // ÉèÖÃ¿¨¼Ð¿¨ÊýÖ¡ 8×Ö½Ú
 typedef struct PC_SET_CARD_NUM_FRAME
 {
-    u8 STX;                 /* Ö¡¿ªÊ¼ */
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
     u8 RSCTL;               /* Ö¡ÐòºÅ */
     u8 CTL;                 /* Ö¡ÀàÐÍ */
     u8 CARD_SPIT_ID[1];     /* ¿¨¼ÐºÅ */
     u8 CARD_NUM[3];         /* ¿¨¼Ð¿¨Êý */
-    u8 ETX;                 /* Ö¡½áÊø */
-    u8 END;
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
 }PC_SET_CARD_NUM_FRAME;
 ///====================================
 
@@ -154,9 +154,9 @@ typedef struct PC_SET_CARD_NUM_FRAME
 // ³£¹æÐÅÏ¢½á¹¹Ìå
 typedef struct Print_msg
 {
-    u8 CTL;
+    const u8 CTL;
     char Msg[40];
-    u8 END;
+    const u8 END;
 }Print_msg;
 
 // ÃüÁî
@@ -223,10 +223,6 @@ typedef enum CMD
     LED_ON                  = 0x50,                 /* Ö¸Ê¾µÆÁÁ */
     LED_OFF                 = 0x51,                 /* Ö¸Ê¾µÆÃð */
     READ_SENSOR             = 0x52,                 /* ¶ÁÈ¡´«¸ÐÆ÷×´Ì¬ */
-
-
-
-
 }CMD;
 
 // ¿¨¡¢»ú×´Ì¬£º00--FFH£º (¿¨¡¢»ú¡¢´«¸ÐÆ÷µÈ×´Ì¬)
@@ -338,6 +334,7 @@ extern PC_SET_CARD_NUM_FRAME            g_tPcSetCardNumFrame;               /* É
 extern unsigned int g_uiaInitCardCount[5];    // ¿¨³õÊ¼ÉèÖÃÖµ,[0]Îª×Ü¿¨ÊýÁ¿,·¢1ÕÅ¿¨,¼õ1,[1~4]ÎªÃ¿¸ö¿¨»ú³õÊ¼¿¨ÊýÁ¿,·¢1ÕÅ¿¨,¼õ1.
 extern unsigned int g_uiaSpitCardCount[5];    // ³ö¿¨ÊýÁ¿,[0]Îª³ö¿¨×ÜÊýÁ¿,·¢1ÕÅ¿¨,¼Ó1,[1~4]ÎªÃ¿¸ö¿¨»ú·¢¿¨ÊýÁ¿,·¢1ÕÅ¿¨,¼Ó1.
 
+void antSwitch(u8 id);
 u8  analyzeCANFrame ( CanRxMsg arg );
 u8  analyzeUartFrame ( u8 argv[], u32 size );
 u8 * checkShowFaultCode (u8 ch);

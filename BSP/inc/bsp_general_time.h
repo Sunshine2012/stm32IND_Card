@@ -27,7 +27,7 @@
 #define            GENERAL_TIM3                   TIM3
 #define            GENERAL_TIM3_APBxClock_FUN     RCC_APB1PeriphClockCmd
 #define            GENERAL_TIM3_CLK               RCC_APB1Periph_TIM3
-#define            GENERAL_TIM3_Period            (1000-1)
+#define            GENERAL_TIM3_Period            (10000-1)
 #define            GENERAL_TIM3_Prescaler         71
 #define            GENERAL_TIM3_IRQ               TIM3_IRQn
 #define            GENERAL_TIM3_IRQHandler        TIM3_IRQHandler
@@ -57,9 +57,9 @@
 #endif
 /**************************函数声明********************************/
 
-extern uint32_t time_0;     // ms 计时变量
-extern uint32_t timeMsg;    // ms 计时变量
-
+extern uint32_t g_time;       // ms 计时变量
+extern uint32_t g_timeMsg;    // ms 计时变量
+extern uint32_t g_timePressKeyDelay; // ms 卡机就绪等待时间,在验卡失败之后,使得,然后再次上按键状态
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);
