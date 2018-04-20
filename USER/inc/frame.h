@@ -29,7 +29,7 @@ typedef enum FRAME
     PC_QUERY_CARD_MECHINE   = 'e',      /* 查询卡机状态(65H)帧          5字节 */
     PC_QUERY_CARD_CLIP      = 'f',      /* 查询卡夹(66H)帧              5字节 */
     PC_SET_CARD_NUM         = 'g',      /* 设置卡夹卡数(67H)帧          8字节 */
-    PC_CAR_HAS_COMING       = 'h',      /* 车以来信息 */
+    PC_CAR_HAS_COMING       = 'h',      /* 车已来信息 */
     PC_CAR_HAS_GONE         = 'i',      /* 车已走信息 */
     MECHINE_CODE_VERSION    = 'v',      /* 版本 */
 
