@@ -168,7 +168,7 @@ void macUSART1_IRQHandler( void )
             g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
 
             //g_tP_RsctlFrame.RSCTL = g_rx_buf[0];
-            //printf("%s\r\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+            //printf("%s\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
 
             /* 发布消息到消息队列 queue */
             uartInQueue( &g_tUARTRxQueue, g_rx_buf ); // 不考虑竞争,所以不设置自旋锁
@@ -179,7 +179,7 @@ void macUSART1_IRQHandler( void )
         else
         {
             //g_tN_RsctlFrame.RSCTL = g_rx_buf[0];
-            //printf("%s\r\n",(char *)&g_tN_RsctlFrame);   //发送应答帧
+            //printf("%s\n",(char *)&g_tN_RsctlFrame);   //发送应答帧
             g_num++;
 
             if ( g_num > 50 ) //一帧数据最大50字节,超出则丢弃

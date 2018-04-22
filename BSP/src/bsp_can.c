@@ -294,7 +294,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     // CANTransmit (&gt_RxMessage);
     if(((0x0000ff00 & gt_RxMessage.ExtId) == 0x00007800) && (gt_RxMessage.IDE == CAN_ID_EXT))
     {
-        if (gt_RxMessage.Data[3] == 0x06)
+        if (gt_RxMessage.Data[3] == SET_MECHINE_STATUS_ACK)
         {
             g_ucaMechineExist[gt_RxMessage.Data[1] - 1] = 1;
         }

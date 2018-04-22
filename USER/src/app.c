@@ -302,7 +302,7 @@ void TmrCallback (OS_TMR *p_tmr, void *p_arg) //软件定时器MyTmr的回调函数
                                          //，并计算定时时间。
     OS_CRITICAL_ENTER();                 //进入临界段，不希望下面语句遭到中断
 
-    //printf ( "\r\n定时2s，通过时间戳测得定时 %07d us，即 %04d ms。\r\n",
+    //printf ( "\n定时2s，通过时间戳测得定时 %07d us，即 %04d ms。\n",
     //                    ts_end / ( cpu_clk_freq / 1000000 ),     //将定时时间折算成 us
     //                    ts_end / ( cpu_clk_freq / 1000 ) );      //将定时时间折算成 ms
 

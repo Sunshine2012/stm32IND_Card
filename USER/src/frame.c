@@ -267,13 +267,13 @@ u8 * checkPriMsg (u8 ch)
             if ( (g_ucaDeviceIsSTBY[0] == 1) && (g_ucaDeviceIsSTBY[1] == 1)
               && (g_ucaDeviceIsSTBY[2] == 1) && (g_ucaDeviceIsSTBY[3] == 1) || (mtRxMessage.Data[2] == 0xff ))
             {
-                if ( mtRxMessage.Data[4] == 0x10 ) // 未进入发卡流程,且有卡
+                if ( mtRxMessage.Data[4] == HAS_CARD ) // 未进入发卡流程,且有卡
                 {
                     // g_ucBadCardCount = 0;
                     if ( g_ucConnectMode == 1 )
                     {
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
-                        delayMs (100);
+                        delayMs (10);
                         g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                         g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换为字符,然后将数据发送出去
                         g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
@@ -281,6 +281,7 @@ u8 * checkPriMsg (u8 ch)
                     }
                     else
                     {
+
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                     }
@@ -293,7 +294,6 @@ u8 * checkPriMsg (u8 ch)
                     myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
                     g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 1;
                 }
-
             }
             else
             {
@@ -302,37 +302,36 @@ u8 * checkPriMsg (u8 ch)
 
             break;
         case CARD_SPIT_NOTICE:                          // 出卡通知
+            antSwitch( 0 ); //释放天线
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
-            if (mtRxMessage.Data[4] == 0x12)
+            if (mtRxMessage.Data[4] == CARD_IS_OK && g_ucConnectMode == 1)
             {
-                generalTIM2Init();      // 初始化定时器
-                g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaHasBadCard[0] ? '2' : '0';
-
-                g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaHasBadCard[1] ? '2' : '0';
-
-                g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[1] ? '2' : '0';
-
-                g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[1] ? '2' : '0';
-
-                g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
-
-
-                g_ucaHasBadCard[mtRxMessage.Data[1] - 1] = 0;   // 清除坏卡状态
                 g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardSpitOutFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';
                 g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                dacSet ( DATA_quka, SOUND_LENGTH_quka );
-
+                //dacSet ( DATA_quka, SOUND_LENGTH_quka );
                 printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+
+                g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE1.status = '0';
+
+                g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE2.status = '0';
+
+                g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE3.status = '0';
+
+                g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE4.status = '0';
+
+                TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+                g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+                g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
+                g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+                printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
             }
+            g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 0;      // 卡翻出去之后,就认为卡未就绪
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // 卡已被取走通知
             antSwitch( 0 ); // 释放天线
@@ -389,22 +388,26 @@ u8 * checkPriMsg (u8 ch)
                 default:
                     break;
             }
-            dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
-            g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-            g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-            g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
-            printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+            //dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
+            if (g_ucConnectMode == 1)
+            {
+                g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+                g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
+                g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
+                printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+            }
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
             g_ucIsUpdateMenu    = 1;                    // 更新界面
             break;
         case CARD_IS_READY:                             // 卡就绪
+            antSwitch( 0 ); //释放天线
             g_ucaHasBadCard[mtRxMessage.Data[1] - 1] = 0;       // 卡就绪,就清除坏卡状态
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_READY_ACK, 0, 0, 0, NO_FAIL );
             copyMenu ( mtRxMessage.Data[1], CARD_IS_READY, 0, 8, 6 );
             g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 1;      // 卡就绪
             break;
         case MECHINE_WARNING:                           // 报警
-            //antSwitch( 0 ); //释放天线
+            antSwitch( 0 ); //释放天线
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, FAULT_CODE_ACK, 0, 0, 0, NO_FAIL ); // 回复故障码
             g_ucaDeviceIsSTBY[0] = 1;
             g_ucaDeviceIsSTBY[1] = 1;
@@ -463,7 +466,15 @@ u8 * checkPriMsg (u8 ch)
                         break;
 
                 }
-                g_ucaFaultCode[mtRxMessage.Data[1] - 1] = mtRxMessage.Data[7]; // 报告故障码
+                if(mtRxMessage.Data[7] == FAULT_CODE11)
+                {
+                    myCANTransmit(gt_TxMessage, mtRxMessage.Data[1], NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, FAULT_CODE11);   // 如果报告总线故障码,本机直接处理,2018年4月21日23:52:16
+                    return;
+                }
+                else
+                {
+                    g_ucaFaultCode[mtRxMessage.Data[1] - 1] = mtRxMessage.Data[7]; // 报告故障码
+                }
             }
             else if ( mtRxMessage.Data[7] > FAULT_CODE11 )
             {
@@ -476,6 +487,14 @@ u8 * checkPriMsg (u8 ch)
             g_ucaMechineExist[mtRxMessage.Data[1] - 1] = 1;    // 如果主机开机,对设备进行设置,卡机有回复,则表明几个卡机存在,并通信正常
             break;
         case CYCLE_ACK:                 // 定时轮询回复
+            if (mtRxMessage.Data[4] == HAS_CARD)
+            {
+                g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 1 ;
+            }
+            else
+            {
+                g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 0 ;
+            }
             break;
         case SET_MECHINE_STATUS_ACK:    // 如果每次设置卡机的主备机状态成功,卡机则会回复此状态,并置状态位为1
             break;
@@ -515,15 +534,19 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                 {
                     case '5':
                         myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        g_ucaHasBadCard[g_ucUpWorkingID - 1] = 0;   // 清除坏卡状态
                         g_uiaInitCardCount[g_ucUpWorkingID]--;
                         copyMenu ( g_ucUpWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucUpWorkingID, 0xfe, 0, 12, 4 ); //
+                        g_ucaCardIsReady[ g_ucUpWorkingID - 1] = 0;
                         break;
                     case '6':
                         myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        g_ucaHasBadCard[g_ucDownWorkingID - 1] = 0;   // 清除坏卡状态
                         g_uiaInitCardCount[g_ucDownWorkingID]--;
                         copyMenu ( g_ucDownWorkingID, CARD_SPIT_NOTICE, 0, 8, 4 );
                         copyStatusMsg ( g_ucDownWorkingID, 0xfe, 0, 12, 4 ); //
+                        g_ucaCardIsReady[ g_ucDownWorkingID - 1] = 0;
                         break;
                     default:
                         break;
@@ -538,10 +561,10 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                 g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaHasBadCard[1] ? '2' : '0';
 
                 g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[1] ? '2' : '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[2] ? '2' : '0';
 
                 g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
-                g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[1] ? '2' : '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[3] ? '2' : '0';
 
                 switch (argv[3])
                 {
@@ -564,22 +587,20 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                 myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
                                 if( g_ucaCardIsReady[1] == 1 )  // 2号卡机已经就绪
                                 {
-                                    delayMs (10);
                                     antSwitch( 2 );                          //  切换天线
-
-                                    generalTIM2Init();      // 初始化定时器
                                     g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                                    printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+
+                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+
+                                    delayMs (100);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
                                     printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                                }
-                                else
-                                {
                                 }
                             }
                         }
@@ -596,22 +617,20 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                 myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
                                 if(g_ucaCardIsReady[0] == 1)  // 卡已经就绪
                                 {
-                                    delayMs (10);
                                     antSwitch( 1 );                          //  切换天线
-
-                                    generalTIM2Init();      // 初始化定时器
                                     g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                                    printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+
+                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+
+                                    delayMs (100);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
                                     printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                                }
-                                else
-                                {
                                 }
                             }
                         }
@@ -634,22 +653,20 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                 myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
                                 if( g_ucaCardIsReady[3] == 1 )
                                 {
-                                    delayMs (10);
                                     antSwitch( 4 );                          //  切换天线
-
-                                    generalTIM2Init();      // 初始化定时器
                                     g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                                    printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+
+                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+
+                                    delayMs (100);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
                                     printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                                }
-                                else
-                                {
                                 }
                             }
                         }
@@ -666,22 +683,19 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                 myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
                                 if( g_ucaCardIsReady[2] == 1 )
                                 {
-                                    delayMs (10);
                                     antSwitch( 3 );                          //  切换天线
-
-                                    generalTIM2Init();      // 初始化定时器
                                     g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                                    printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+
+                                    delayMs (100);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
                                     printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                                }
-                                else
-                                {
                                 }
                             }
                         }
@@ -711,7 +725,7 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
             case PC_CAR_HAS_GONE:             /* 车已走 */
                 break;
            case MECHINE_CODE_VERSION:
-                printf ("the code version %s,%s\r\n", __DATE__,__TIME__);
+                printf ("the code version %s,%s\n", __DATE__,__TIME__);
                 break;
             default:
                 displayGB2312String (0, 0, argv, 1);   /* 无效信息 */

@@ -47,7 +47,7 @@ void  GENERAL_TIM2_IRQHandler (void)
         //if (timeMsg == 2)    // 2秒上报一次系统消息
         {
             //timeMsg = 0;
-            printf ( "%s\r\n", ( char * ) &g_tCardMechineStatusFrame );
+            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
         }
     }
 }
@@ -62,36 +62,6 @@ void  GENERAL_TIM3_IRQHandler (void)
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
-        /*
-        if (g_time == 0 && g_ucKeyValues == KEY_NUL)
-        {
-            g_time = 3000;
-            g_ucKeyValues = KEY_QUIT;                                   // 30秒钟将屏幕回到主显示
-            LCD_BAK_SET;
-            //TIM_ITConfig(GENERAL_TIM3,TIM_IT_Update,DISABLE);         // 关闭中断
-        }
-        */
-        /*
-        if (g_timePressKeyDelay == 0 && g_ucRepeatKeyMechine != 0)
-        {
-            if (g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] == 1 )           // 卡就绪
-            {
-                g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] = 0;
-                antSwitch( g_ucRepeatKeyMechine );                          //  切换天线
-                g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                g_tCardKeyPressFrame.CARD_MECHINE = g_ucRepeatKeyMechine <= 2 ? '1' : '2';
-                g_tCardKeyPressFrame.MECHINE_ID = g_ucRepeatKeyMechine + '0';
-                printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                g_ucRepeatKeyMechine = 0;
-            }
-            else if (g_ucaCardIsReady[g_ucRepeatKeyMechine - 1] == 0)          // 卡未就绪
-            {
-                g_timePressKeyDelay = 500;
-            }
-        }
-        g_time--;
-        g_timePressKeyDelay--;
-        */
     }
 }
 
@@ -150,7 +120,7 @@ static void GENERAL_TIM2_Mode_Config(void)
     TIM_ITConfig(GENERAL_TIM2,TIM_IT_Update,ENABLE);
 
     // 使能计数器
-    TIM_Cmd(GENERAL_TIM2, ENABLE);
+    // TIM_Cmd(GENERAL_TIM2, ENABLE);
 }
 
 // 中断优先级配置
