@@ -1,6 +1,7 @@
 #include <includes.h>
 
 u8 g_ucConnectMode      = 1;            // 1为联机模式,其他为单机测试模式
+u8 g_ucIsSetting        = 0;            // 如果有人在操作界面的时候,新来的报警都处于后台显示,当处理完成之后
 u8 g_ucIsUpdateMenu     = 0;            // 更新显示
 u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
 u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
@@ -18,7 +19,6 @@ u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
 u8 g_ucRepeatKeyMechine = 0;             // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
 u8 g_ucBadCardCount   = 0;               // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 
-const u8 g_BadCardCount   = 0;
 
 CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
@@ -128,6 +128,8 @@ int main( void )
 
     bspInit();
 
+    printf ("%s\n","你好,欢迎使用乐为电子板卡系统");
+
     doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
 
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
@@ -149,7 +151,7 @@ int main( void )
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
 
-    printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
+    printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
 
     TIM_Cmd(GENERAL_TIM2, ENABLE);      // 上电初始化
 

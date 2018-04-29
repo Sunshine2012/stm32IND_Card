@@ -273,11 +273,11 @@ u8 * checkPriMsg (u8 ch)
                     if ( g_ucConnectMode == 1 )
                     {
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
-                        delayMs (200);
+                        delayMs (150);
                         g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                         g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换为字符,然后将数据发送出去
                         g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
-                        printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                        printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
                     }
                     else
                     {
@@ -310,7 +310,7 @@ u8 * checkPriMsg (u8 ch)
                 g_tCardSpitOutFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';
                 g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
                 //dacSet ( DATA_quka, SOUND_LENGTH_quka );
-                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+                printf ("%s", (char *)&g_tCardSpitOutFrame);
 
                 g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
                 g_tCardMechineStatusFrame.CARD_MECHINE1.status = '0';
@@ -328,7 +328,7 @@ u8 * checkPriMsg (u8 ch)
                 g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                 g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-                printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
             }
             g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 0;      // 卡翻出去之后,就认为卡未就绪
             break;
@@ -393,7 +393,7 @@ u8 * checkPriMsg (u8 ch)
                 g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
                 g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
-                printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+                printf ( "%s", ( char * ) &g_tCardTakeAwayFrame );
             }
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
             g_ucIsUpdateMenu    = 1;                    // 更新界面
@@ -508,21 +508,13 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
 
     u8 ucaFrame[50] = {0};
     u8 ucSerNum = 0;
-    u8 ucNum = argv[1];
+    //u8 ucNum = argv[1];
     u8 type_frame = argv[2];
-    //strcpy (ucaFrame, argv);
-    if (POSITIVE_ACK == type_frame)    // 正应答帧
-    {
-        return 0;
-    }
-    else if (NAGATIVE_ACK == type_frame)    // 负应答帧
-    {
 
-    }
-    else if (PC_INIT_MECHINE <= type_frame <= PC_SET_CARD_NUM)  // 检测数据合法性
+    if (PC_INIT_MECHINE <= type_frame <= PC_SET_CARD_NUM)  // 检测数据合法性
     {
-        g_tP_RsctlFrame.RSCTL = ucNum;
-        printf("%s\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+        //g_tP_RsctlFrame.RSCTL = ucNum;
+        //printf("%s",(char *)&g_tP_RsctlFrame);   //发送正应答帧
         switch(type_frame)
         {
             case PC_INIT_MECHINE:               /* 初始化卡机信息(61H)帧 */
@@ -592,14 +584,14 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
                                     TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
 
-                                    delayMs (100);
+                                    delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
                                 }
                             }
                         }
@@ -622,14 +614,14 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
                                     TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
 
-                                    delayMs (100);
+                                    delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
                                 }
                             }
                         }
@@ -658,14 +650,14 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
                                     TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
 
-                                    delayMs (100);
+                                    delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
                                 }
                             }
                         }
@@ -687,14 +679,14 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
                                     TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
 
-                                    delayMs (100);
+                                    delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
                                 }
                             }
                         }
@@ -724,11 +716,13 @@ u8  analyzeUartFrame ( u8 argv[] , u32 size)
             case PC_CAR_HAS_GONE:             /* 车已走 */
                 break;
            case MECHINE_CODE_VERSION:
-                printf ("the code version %s,%s\n", __DATE__,__TIME__);
+                printf ("the code version %s,%s", __DATE__,__TIME__);
                 break;
             default:
                 displayGB2312String (0, 0, argv, 1);   /* 无效信息 */
                 displayGB2312String (0, 2, "无效信息", 0);
+                displayGB2312String (0, 4, "                ", 0);
+                displayGB2312String (0, 6, "                ", 0);
                 break;
         }
         DEBUG_printf ("%s\n",(char *)checkPriMsg(type_frame));

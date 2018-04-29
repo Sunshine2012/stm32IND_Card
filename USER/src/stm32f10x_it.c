@@ -165,26 +165,51 @@ void macUSART1_IRQHandler( void )
         }
         else if ( g_rx_buf[g_num] == FRAME_END ) // 当接收到的值等于'>'时，结束一帧数据
         {
-            g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
 
-            //g_tP_RsctlFrame.RSCTL = g_rx_buf[0];
-            //printf("%s\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+            if(POSITIVE_ACK == g_rx_buf[2])      // 如果是正应答帧,不压栈
+            {
+                g_num = 0;
+                g_rx_buf[g_num] = 0;
+            }
+            else if (NAGATIVE_ACK == g_rx_buf[2])
+            {
+                g_num = 0;
+                g_rx_buf[g_num] = 0;
+            }
+            else
+            {
 
-            /* 发布消息到消息队列 queue */
-            uartInQueue( &g_tUARTRxQueue, g_rx_buf ); // 不考虑竞争,所以不设置自旋锁
+                // 禁止串口接收中断
+                USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
+                g_tP_RsctlFrame.RSCTL = g_rx_buf[1];
+                printf("%s",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+                // 使能串口接收中断
+                USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
 
+                g_rx_buf[g_num + 1] = 0;    // 加上行尾标识符
+                /* 发布消息到消息队列 queue */
+                uartInQueue( &g_tUARTRxQueue, g_rx_buf ); // 不考虑竞争,所以不设置自旋锁
+            }
         }
 
         // 当值不等时候，则继续接收下一个
         else
         {
-            //g_tN_RsctlFrame.RSCTL = g_rx_buf[0];
-            //printf("%s\n",(char *)&g_tN_RsctlFrame);   //发送应答帧
+
             g_num++;
 
             if ( g_num > 50 ) //一帧数据最大50字节,超出则丢弃
             {
+
+                // 禁止串口接收中断
+                USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
+                g_tN_RsctlFrame.RSCTL = g_rx_buf[1];
+                printf("%s",(char *)&g_tN_RsctlFrame);   //发送负应答帧
+                // 使能串口接收中断
+                USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
+
                 g_num = 0;
+                g_rx_buf[g_num] = 0;
             }
         }
     }

@@ -306,7 +306,7 @@ void TmrCallback (OS_TMR *p_tmr, void *p_arg) //软件定时器MyTmr的回调函数
     //                    ts_end / ( cpu_clk_freq / 1000000 ),     //将定时时间折算成 us
     //                    ts_end / ( cpu_clk_freq / 1000 ) );      //将定时时间折算成 ms
 
-    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
     OS_CRITICAL_EXIT();
 
     ts_start = OS_TS_GET();                            //获取定时前时间戳
