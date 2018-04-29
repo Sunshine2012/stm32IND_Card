@@ -273,7 +273,7 @@ u8 * checkPriMsg (u8 ch)
                     if ( g_ucConnectMode == 1 )
                     {
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
-                        delayMs (10);
+                        delayMs (200);
                         g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                         g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';		// 将数据转换为字符,然后将数据发送出去
                         g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
@@ -281,7 +281,6 @@ u8 * checkPriMsg (u8 ch)
                     }
                     else
                     {
-
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                     }
@@ -334,7 +333,7 @@ u8 * checkPriMsg (u8 ch)
             g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 0;      // 卡翻出去之后,就认为卡未就绪
             break;
         case CARD_TAKE_AWAY_NOTICE:                     // 卡已被取走通知
-            antSwitch( 0 ); // 释放天线
+            //antSwitch( 0 ); // 释放天线
             g_ucaHasBadCard[mtRxMessage.Data[1] - 1] = 0;   // 清除坏卡状态
             g_ucaDeviceIsSTBY[mtRxMessage.Data[1] -1] = 1;  // 表明卡已经被取走,置位状态
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_TAKE_AWAY_NOTICE_ACK, 0, 0, 0, NO_FAIL );
@@ -400,14 +399,14 @@ u8 * checkPriMsg (u8 ch)
             g_ucIsUpdateMenu    = 1;                    // 更新界面
             break;
         case CARD_IS_READY:                             // 卡就绪
-            antSwitch( 0 ); //释放天线
+            //antSwitch( 0 ); //释放天线
             g_ucaHasBadCard[mtRxMessage.Data[1] - 1] = 0;       // 卡就绪,就清除坏卡状态
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_READY_ACK, 0, 0, 0, NO_FAIL );
             copyMenu ( mtRxMessage.Data[1], CARD_IS_READY, 0, 8, 6 );
             g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 1;      // 卡就绪
             break;
         case MECHINE_WARNING:                           // 报警
-            antSwitch( 0 ); //释放天线
+            //antSwitch( 0 ); //释放天线
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, FAULT_CODE_ACK, 0, 0, 0, NO_FAIL ); // 回复故障码
             g_ucaDeviceIsSTBY[0] = 1;
             g_ucaDeviceIsSTBY[1] = 1;

@@ -30,7 +30,12 @@ u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
 
 void bspInit( void )
 {
+    int i = 0;
     delayInit();                                                                // 定时函数
+    for (i = 0; i < 20; i++)    // 初始化时间延时20秒,避免卡机没有初始化完成
+    {
+        delayMs (1000);
+    }
     LED_Init();                                                                 // 初始化 LED
     antGPIOInit();  // 天线切换引脚初始化
 
@@ -43,11 +48,6 @@ void bspInit( void )
     lcdInit();
     canInitQueue( &g_tCanRxQueue );
     canInit();                                                                  // 初始化CAN通信
-
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
 
     generalTIM2Init();          // 定时器初始化,2s定时上报状态信息
     generalTIM3Init();          // 定时器初始化,30s定时无按键按下,退回到主界面
@@ -133,6 +133,11 @@ int main( void )
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
+
+    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
+    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
+    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
+    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
 
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
