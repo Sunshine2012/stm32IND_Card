@@ -301,11 +301,11 @@ u8 * checkPriMsg (u8 ch)
 
             break;
         case CARD_SPIT_NOTICE:                          // 出卡通知
-            antSwitch( 0 ); //释放天线
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, CARD_SPIT_NOTICE_ACK, 0, 0, 0, NO_FAIL );
             copyMenu ( mtRxMessage.Data[1], CARD_SPIT_NOTICE, 0, 8, 4 );
             if (mtRxMessage.Data[4] == CARD_IS_OK && g_ucConnectMode == 1)
             {
+                antSwitch( 0 ); //释放天线
                 g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardSpitOutFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';
                 g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';

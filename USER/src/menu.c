@@ -151,7 +151,7 @@ void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             switch (g_dlg[dlgId].highLightRow)
             {
                 case 0:
-                    doShowStatusOne (DLG_STATUS_ONE, 5, NULL);
+                    //doShowStatusOne (DLG_STATUS_ONE, 5, NULL);
                     break;
                 case 1:
                     doShowConnectModeSet (DLG_CONNETCT_SET, 5, NULL);
@@ -181,11 +181,13 @@ void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;    // 退出到主菜单
             g_ucIsUpdateMenu = 1;
             break;
-        case KEY_CANCEL:    // 退出
+        case KEY_CANCEL:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;    // 退出到主菜单
             g_ucIsUpdateMenu = 1;
@@ -471,6 +473,7 @@ void doShowConnectModeSet (u8 dlg_id, u8 isNotRow, void * p_parm)
             */
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
@@ -513,6 +516,7 @@ void doShowStatusOne (u8 dlg_id, u8 isNotRow, void * p_parm)
             doShowStatusTwo (DLG_STATUS_TWO, 5, NULL);
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
@@ -557,6 +561,7 @@ void doShowStatusTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
@@ -585,7 +590,6 @@ void doShowWorkingSet (u8 dlg_id, u8 isNotRow, void * p_parm)
     u8 master4[] = "3:备用    4:工作";
 
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
-    //g_dlg[dlgId].highLightRow = 1;
     if(g_ucUpWorkingID == 1 && g_ucUpBackingID == 2)
     {
         for (i = 0; i < 16; i++)
@@ -714,12 +718,13 @@ void doShowWorkingSet (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_QUIT:
-            g_dlg[dlgId].highLightRow = 0;
+            g_ucIsSetting = 0;
+            g_dlg[dlgId].highLightRow = 1;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
-            g_dlg[dlgId].highLightRow = 0;
+            g_dlg[dlgId].highLightRow = 1;
             g_ucCurDlg = DLG_MAIN;
             g_ucIsUpdateMenu = 1;
             break;
@@ -819,6 +824,7 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
@@ -884,6 +890,7 @@ void doShowDebugOne (u8 dlg_id, u8 isNotRow, void * p_parm)
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
@@ -909,7 +916,7 @@ void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
     u16 id = 0x7810 | g_ucCurID;                          // CAN通信的ID
     u8 id_h = ( id >> 8 ) & 0xff;                   // CAN通信的ID高字节
     u8 id_l = id & 0xff;                            // CAN通信的ID低字节
-    g_ucKeyContinu = 1;                             // 进入单动模式
+    g_ucKeyContinue = 1;                            // 进入单动模式
 
     g_ucCurDlg = dlg_id;                            // 记录当前显示的ID
 
@@ -948,16 +955,17 @@ void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_QUIT:
+            g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
-            g_ucKeyContinu = 0;             // 退出单动模式
+            g_ucKeyContinue = 0;             // 退出单动模式
             break;
         case KEY_CANCEL:
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_DEBUG_MAIN;
             g_ucIsUpdateMenu = 1;
-            g_ucKeyContinu = 0;             // 退出单动模式
+            g_ucKeyContinue = 0;             // 退出单动模式
             break;
         default:
             break;
@@ -973,7 +981,7 @@ void doShowFaultCode (u8 dlg_id, u8 isNotRow, void * p_parm)
     u8 j = 0;
     u8 n = 0;
     u8 dlgId = check_menu(dlg_id);
-    u8 key = KEY_NUL;
+    volatile u8 key = KEY_NUL;
     u8 num = 1;      // 卡机号
     u8 str_num[5] = {0};
     u16 id = 0x7810 | num;       // CAN通信的ID
@@ -992,7 +1000,6 @@ void doShowFaultCode (u8 dlg_id, u8 isNotRow, void * p_parm)
             {
                 faultCode = g_ucaFaultCode[i];   // 记下当前的未处理的故障和卡机号
                 faultCodeIndex = i;
-                //g_ucaFaultCode[i] = 0;
                 num = i + 1;        // 记住是哪个卡机有故障,以清除故障
                 sprintf(str_num,"%02d",num);
                 for (n = 0; n < 2; n++)
@@ -1014,11 +1021,20 @@ while_label:
     g_ucKeyValues = KEY_NUL;
     switch (key)
     {
-        case KEY_ENTRY:     // 在故障码显示界面,按菜单键可以进入设置界面,且不清除按键值
+        case KEY_ENTRY:
+            // 在故障码显示界面,按菜单键可以进入设置界面,且不清除按键值
             g_ucaFaultCode[faultCodeIndex] = faultCode; // 保存当前未处理的故障,以免下次再次处理
+            g_ucIsSetting = 1;
+            for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
+            {
+                g_ucaDeviceIsSTBY[i] = 1;
+            }
             g_dlg[dlgId].highLightRow = 0;
+            g_ucCurDlg = DLG_STATUS;
+            g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
+            g_ucIsSetting = 1;
             g_ucaFaultCode[faultCodeIndex] = 0;
             myCANTransmit(gt_TxMessage, num, NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, faultCode);
             for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
@@ -1026,10 +1042,20 @@ while_label:
                 g_ucaDeviceIsSTBY[i] = 1;
             }
             g_dlg[dlgId].highLightRow = 0;
-            g_ucIsUpdateMenu = 1;
             g_ucCurDlg = DLG_STATUS;
+            g_ucIsUpdateMenu = 1;
             break;
-        default:
+        case KEY_QUIT:
+            g_ucIsSetting = 1;
+            for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
+            {
+                g_ucaDeviceIsSTBY[i] = 1;
+            }
+            g_dlg[dlgId].highLightRow = 0;
+            g_ucCurDlg = DLG_STATUS;
+            g_ucIsUpdateMenu = 1;
+            break;
+        default :
             break;
     }
 }

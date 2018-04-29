@@ -25,6 +25,10 @@ UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
 CanRxMsg  g_tCanRxMsg = {0};          // CAN数据出队元素
 u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
 
+
+typedef enum {FALSE = 0, TRUE = !FALSE} STATE;
+
+
 //要写入到STM32 FLASH的字符串数组
 //const u8 TEXT_Buffer[]={1};
 
@@ -63,16 +67,18 @@ void lcdRef()
     {
         g_ucIsUpdateMenu = 0;
 
-        if ( ( g_ucaFaultCode[0] != 0 ) || ( g_ucaFaultCode[1] != 0 ) || ( g_ucaFaultCode[2] != 0 ) || ( g_ucaFaultCode[3] != 0 ) )
+        if ( 0 == g_ucIsSetting )
         {
-            if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) || ( g_ucKeyValues == KEY_CANCEL ) )
+            if ( ( g_ucaFaultCode[0] != 0 ) || ( g_ucaFaultCode[1] != 0 ) || ( g_ucaFaultCode[2] != 0 ) || ( g_ucaFaultCode[3] != 0 ) )
             {
-                doShowFaultCode( DLG_FAULT_CODE, 5, NULL );
+                if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) || ( g_ucKeyValues == KEY_CANCEL ) )
+                {
+                    doShowFaultCode( DLG_FAULT_CODE, 5, NULL );
+                }
+                g_ucIsNewWarningCode = 0;
+                g_ucKeyValues = KEY_NUL;
+                return;
             }
-
-            g_ucIsNewWarningCode = 0;
-            g_ucKeyValues = KEY_NUL;
-            return;
         }
 
         switch ( g_ucCurDlg )
@@ -128,7 +134,7 @@ int main( void )
 
     bspInit();
 
-    printf ("%s\n","你好,欢迎使用乐为电子板卡系统");
+    printf ("%s","你好,欢迎使用乐为电子板卡系统");
 
     doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
 
@@ -153,7 +159,10 @@ int main( void )
 
     printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
 
-    TIM_Cmd(GENERAL_TIM2, ENABLE);      // 上电初始化
+    // 使能计数器
+    TIM_Cmd(GENERAL_TIM2, ENABLE);
+    // 使能计数器
+    TIM_Cmd(GENERAL_TIM3, ENABLE);
 
     while ( 1 )
     {
@@ -175,6 +184,7 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
+        delayMs (10);
     }
 }
 

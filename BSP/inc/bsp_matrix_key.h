@@ -81,13 +81,13 @@ typedef enum KEY_VALUES
 
 #endif
 
-extern unsigned char g_ucKeyValues;      // 当前按键值,全局
-extern unsigned char g_ucKeyContinu;     // 连续按键的标志
+extern volatile u8 g_ucKeyValues;      // 当前按键值,全局
+extern volatile u8 g_ucKeyContinue;    // 连续按键的标志
 
 
 /* 4*4矩阵键盘 */
 void matrixKeyboardInit(void);
 u8 matrixUpdateKey(void);
-extern unsigned char matrix_key[4][4];
+extern u8 matrix_key[4][4];
 
 #endif

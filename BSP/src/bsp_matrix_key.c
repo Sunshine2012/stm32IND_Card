@@ -2,9 +2,9 @@
 #include "includes.h"
 
 /**************矩阵键盘.c文件*****************************/
-unsigned char matrix_key[4][4];
-unsigned char g_ucKeyValues = KEY_NUL;      // 当前按键值,全局
-unsigned char g_ucKeyContinu = 0;           // 连续按键的标志
+u8 matrix_key[4][4];
+volatile u8 g_ucKeyValues = KEY_NUL;      // 当前按键值,全局
+volatile u8 g_ucKeyContinue = 0;           // 连续按键的标志
 struct io_port
 {
     GPIO_TypeDef *GPIO_x;
@@ -192,7 +192,6 @@ u8 matrixUpdateKey(void)
     unsigned char i = 0;
     unsigned char j = 0;
     unsigned char ucTime = 0;
-    static unsigned char isReleaseKey = 1;
     if (g_ucKeyValues != KEY_NUL)
     {
         return 0;
@@ -208,12 +207,12 @@ u8 matrixUpdateKey(void)
                 while(!GPIO_ReadInputDataBit(matrix_key_input[j].GPIO_x, matrix_key_input[j].GPIO_pin))
                 {
                     delayMs(10);
-                    if (g_ucKeyContinu == 1)        // 以下是超时处理
+                    if (g_ucKeyContinue == 1)        // 以下是超时处理
                     {
                         if (ucTime++ == 20)         // 如果是连续按键,20ms退出,加上进程延时10ms,共210ms发送一次按键
                         {
                             ucTime = 0;
-                            g_ucKeyContinu = 0;     // 连续模式按键,松开之后直接退出
+                            g_ucKeyContinue = 0;     // 连续模式按键,松开之后直接退出
                             break;
                         }
                     }
@@ -229,8 +228,7 @@ u8 matrixUpdateKey(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
-                //TIM_Cmd(GENERAL_TIM3, ENABLE); // 如果30秒没有按键,则退出到主界面显示当前发卡机的状态
-                g_time = 3000;
+                g_uiKeyTime = 10000;    // 10秒没有按键,且有故障的情况下,则显示故障
                 return 0;
             }
         }

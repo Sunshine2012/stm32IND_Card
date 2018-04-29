@@ -1,9 +1,9 @@
 #include <includes.h>
 #include "bsp_general_time.h"
 
-uint32_t g_time = 0;  // ms 计时变量
-uint32_t g_timeMsg = 0; // ms 计时变量
-uint32_t g_timePressKeyDelay = 0; // ms 卡机就绪等待时间,在验卡失败之后,使得,然后再次上按键状态
+u32 g_uiKeyTime = 0;  // 按键状态计时变量
+u32 g_uiTimeMsg = 0;  // ms 计时变量
+u32 g_uiTimePressKeyDelay = 0;
 
 /**
   * @brief  This function handles TIM interrupt request.
@@ -47,7 +47,7 @@ void  GENERAL_TIM2_IRQHandler (void)
         //if (timeMsg == 2)    // 2秒上报一次系统消息
         {
             //timeMsg = 0;
-            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+            printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
         }
     }
 }
@@ -62,6 +62,18 @@ void  GENERAL_TIM3_IRQHandler (void)
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
+        if ( ( g_uiKeyTime == 0 ) && ( g_ucIsSetting != 0 ) )
+        {
+            g_ucIsSetting = 0;
+        }
+        else if (g_uiKeyTime > 0)
+        {
+            g_uiKeyTime--;
+        }
+        else
+        {
+            g_uiKeyTime = 0;
+        }
     }
 }
 
@@ -178,7 +190,7 @@ static void GENERAL_TIM3_Mode_Config(void)
     TIM_ITConfig(GENERAL_TIM3,TIM_IT_Update,ENABLE);
 
     // 使能计数器
-    TIM_Cmd(GENERAL_TIM3, ENABLE);
+    // TIM_Cmd(GENERAL_TIM3, ENABLE);
 }
 
 void generalTIM2Init(void)
