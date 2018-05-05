@@ -24,7 +24,7 @@ static struct io_port matrix_key_input[4] =
     //{GPIOD, GPIO_Pin_6}, {GPIOD, GPIO_Pin_7}
 };
 
-void matrix_keyboard_init(void)
+void matrixKeyboardInit(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     unsigned char i;
@@ -67,7 +67,7 @@ static struct io_port matrix_key_input[4] =
     {GPIOC, GPIO_Pin_12}, {GPIOD, GPIO_Pin_2},
 };
 
-void matrix_keyboard_init(void)
+void matrixKeyboardInit(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     unsigned char i;
@@ -115,7 +115,7 @@ static struct io_port matrix_key_input[4] =
     //{GPIOD, GPIO_Pin_6}, {GPIOD, GPIO_Pin_7}
 };
 
-void matrix_keyboard_init(void)
+void matrixKeyboardInit(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     unsigned char i;
@@ -228,7 +228,7 @@ u8 matrixUpdateKey(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
-                g_uiKeyTime = 10000;    // 10秒没有按键,且有故障的情况下,则显示故障
+                g_siKeyTime = 10000;    // 10秒没有按键,且有故障的情况下,则显示故障
                 return 0;
             }
         }

@@ -108,6 +108,18 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_dlg[dlgId].MsgRow[3][i + 2] = master1[i];
         }
     }
+    if (g_ucConnectMode == 1)    // 显示离线,在线模式
+    {
+        g_dlg[dlgId].MsgRow[0][15] = 'O';
+    }
+    else if (g_ucConnectMode == 2)
+    {
+        g_dlg[dlgId].MsgRow[0][15] = 'X';
+    }
+    else
+    {
+        g_dlg[dlgId].MsgRow[0][15] = ' ';
+    }
 
     for (i = 0; i < 4; i++)
     {
@@ -121,6 +133,18 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
     {
         case KEY_ENTRY:
             doShowMainMenu (DLG_MAIN, 0, NULL);         // 进入设置状态
+            break;
+        case KEY_QUIT:
+            g_ucIsSetting = 0;
+            g_ucIsUpdateMenu = 1;
+            break;
+        case KEY_RIGHT:
+            g_ucKeyPressCount++;
+            if (g_ucKeyPressCount >= 6) // 2秒之内连续按键6次,则重新启动软件
+            {
+                g_ucKeyPressCount = 0;
+                while (1);    // 什么都不做,等待复位
+            }
             break;
         default:
             break;
@@ -1023,7 +1047,7 @@ while_label:
     {
         case KEY_ENTRY:
             // 在故障码显示界面,按菜单键可以进入设置界面,且不清除按键值
-            g_ucaFaultCode[faultCodeIndex] = faultCode; // 保存当前未处理的故障,以免下次再次处理
+            //g_ucaFaultCode[faultCodeIndex] = faultCode; // 保存当前未处理的故障,以免下次再次处理
             g_ucIsSetting = 1;
             for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
             {
@@ -1034,7 +1058,7 @@ while_label:
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
-            g_ucIsSetting = 1;
+            //g_ucIsSetting = 1;
             g_ucaFaultCode[faultCodeIndex] = 0;
             myCANTransmit(gt_TxMessage, num, NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, faultCode);
             for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程

@@ -11,14 +11,15 @@ u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
 u8 g_ucDownBackingID    = 4;            // 下工位备用卡机号
+u8 g_ucRepeatKeyMechine = 0;            // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
+u8 g_ucBadCardCount     = 0;            // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 u8 g_ucaCardIsReady[4]  = {0, 0, 0, 0}; // 卡就绪
 u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
 u8 g_ucaDeviceIsSTBY[4] = {1, 1, 1, 1}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
-u8 g_ucRepeatKeyMechine = 0;             // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
-u8 g_ucBadCardCount   = 0;               // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 
+u8 g_ucKeyPressCount = 0;                // 在2秒钟连续按键6次,则重启设备
 
 CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
@@ -38,7 +39,7 @@ void bspInit( void )
     delayInit();                                                                // 定时函数
     for (i = 0; i < 20; i++)    // 初始化时间延时20秒,避免卡机没有初始化完成
     {
-        delayMs (1000);
+        //delayMs (1000);
     }
     LED_Init();                                                                 // 初始化 LED
     antGPIOInit();  // 天线切换引脚初始化
@@ -71,7 +72,7 @@ void lcdRef()
         {
             if ( ( g_ucaFaultCode[0] != 0 ) || ( g_ucaFaultCode[1] != 0 ) || ( g_ucaFaultCode[2] != 0 ) || ( g_ucaFaultCode[3] != 0 ) )
             {
-                if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) || ( g_ucKeyValues == KEY_CANCEL ) )
+                if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) || ( g_ucKeyValues == KEY_CANCEL ) || ( g_ucKeyValues == KEY_ENTRY ) )
                 {
                     doShowFaultCode( DLG_FAULT_CODE, 5, NULL );
                 }
@@ -129,6 +130,7 @@ void lcdRef()
     }
 }
 int main( void )
+
 {
     u8 ret = 0;
 
@@ -159,10 +161,13 @@ int main( void )
 
     printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
 
+    g_siMsgTime = 2000;      // 2秒查询一次卡机状态
+    g_siKeyPressTime = 2000; // 2秒复位连续按键值
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
+
 
     while ( 1 )
     {
@@ -184,7 +189,7 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-        delayMs (10);
+        delayMs (5);
     }
 }
 

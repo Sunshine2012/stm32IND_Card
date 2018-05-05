@@ -102,6 +102,8 @@ extern u8 g_ucaHasBadCard[4];    // 有坏卡
 extern u8 g_ucRepeatKeyMechine;  // 如果连续出现两张坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报按键值
 extern u8 g_ucBadCardCount;      // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 
+extern u8 g_ucKeyPressCount;     // 在2秒钟连续按键6次,则重启设备
+
 extern Dlg           g_dlg[];
 extern Dlg g_dlg_fault_code[];
 

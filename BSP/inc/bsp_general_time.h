@@ -57,9 +57,9 @@
 #endif
 /**************************函数声明********************************/
 
-extern u32 g_uiKeyTime;       // 按键状态计时变量
-extern u32 g_uiTimeMsg;       // ms 计时变量
-extern u32 g_uiTimePressKeyDelay;
+extern s32 g_siKeyTime;       // 按键状态计时变量
+extern s32 g_siMsgTime;       // ms 计时变量
+extern s32 g_siKeyPressTime;
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);

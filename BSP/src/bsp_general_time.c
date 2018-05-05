@@ -1,9 +1,9 @@
 #include <includes.h>
 #include "bsp_general_time.h"
 
-u32 g_uiKeyTime = 0;  // 按键状态计时变量
-u32 g_uiTimeMsg = 0;  // ms 计时变量
-u32 g_uiTimePressKeyDelay = 0;
+s32 g_siKeyTime = 0;  // 按键状态计时变量
+s32 g_siMsgTime = 0;  // ms 计时变量
+s32 g_siKeyPressTime = 0;
 
 /**
   * @brief  This function handles TIM interrupt request.
@@ -12,7 +12,7 @@ u32 g_uiTimePressKeyDelay = 0;
   */
 void  GENERAL_TIM2_IRQHandler (void)
 {
-    // 2中断一次
+    // 2中断一次,上报给上位机状态
     if ( TIM_GetITStatus( GENERAL_TIM2, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM2 , TIM_FLAG_Update);       // 清中断
@@ -58,21 +58,39 @@ void  GENERAL_TIM2_IRQHandler (void)
   */
 void  GENERAL_TIM3_IRQHandler (void)
 {
-    // 10ms中断一次
+    // 1ms中断一次
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
-        if ( ( g_uiKeyTime == 0 ) && ( g_ucIsSetting != 0 ) )
+
+        if ( g_siKeyTime > 0 )
         {
-            g_ucIsSetting = 0;
+            if ( ( --g_siKeyTime == 0) && ( g_ucIsSetting != 0 ) )
+            {
+                g_ucIsSetting = 0;
+                g_ucIsUpdateMenu = 1;
+            }
         }
-        else if (g_uiKeyTime > 0)
+
+        if ( g_siMsgTime > 0)
         {
-            g_uiKeyTime--;
+            if ( --g_siMsgTime == 0)
+            {
+                //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                g_siMsgTime = 2000;
+            }
         }
-        else
+
+        if (g_siKeyPressTime > 0)
         {
-            g_uiKeyTime = 0;
+            if ( --g_siKeyPressTime == 0)
+            {
+                g_siKeyPressTime = 2000;
+                g_ucKeyPressCount = 0;
+            }
         }
     }
 }
