@@ -9,7 +9,7 @@ Dlg g_dlg[] =           {
                         {DLG_STATUS,         "1.工作:         ", "2.备用:         ", "3.工作:         ", "4.备用:         ", 5},
                         {DLG_MAIN,           "1.卡机状态      ", "2.联机设置      ", "3.卡机设置      ", "4.调机运行      ", 0},
                         {DLG_CARD_COUNT_SET, "1 号机卡数      ", "2 号机卡数      ", "3 号机卡数      ", "4 号机卡数      ", 5},
-                        {DLG_CONNETCT_SET,   "  联机模式设置  ", "1.在线发卡      ", "2.离线发卡      ", "                ", 1},
+                        {DLG_CONNETCT_SET,   "  联机模式设置  ", "1.在线发卡      ", "2.离线发卡      ", "3:一键清卡        ", 1},
                         {DLG_CARD_ID,        "   设置卡机ID   ", "搜索卡机        ", "卡机号:         ", "通信ID号:       ", 5},
                         {DLG_WORKING_SET,    "  卡机工作设置  ", "1:工作    2:备用", "3:工作    4:备用", "                ", 1},
 
@@ -17,7 +17,7 @@ Dlg g_dlg[] =           {
                         {DLG_STATUS_ONE,     " 1号出卡        ", " 2号出卡        ", " 3号出卡        ", " 4号出卡        ", 5},
                         {DLG_STATUS_TWO,     " 1号出坏卡      ", " 2号出坏卡      ", " 3号出坏卡      ", " 4号出坏卡      ", 5},
 
-                        {DLG_DEBUG_MAIN,     "    号卡机调试  ", "1:联动运行      ", "2:单动运行      ", "                ", 0},
+                        {DLG_DEBUG_MAIN,     "    号卡机调试  ", "1:联动运行      ", "2:单动运行      ", "3:初始化卡机    ", 0},
                         {DLG_DEBUG_ONE,      "↑: 翻一张好卡   ", "↓: 翻一张坏卡   ", "←: 勾一张卡     ", "→: 循环出卡     ", 5},
                         {DLG_DEBUG_TWO,      "↑: 单动正翻卡   ", "↓: 单动反翻卡   ", "←: 单动正勾卡   ", "→: 单动反勾卡   ", 5},
 
@@ -108,17 +108,19 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_dlg[dlgId].MsgRow[3][i + 2] = master1[i];
         }
     }
-    if (g_ucConnectMode == 1)    // 显示离线,在线模式
-    {
-        g_dlg[dlgId].MsgRow[0][15] = 'O';
-    }
-    else if (g_ucConnectMode == 2)
+    if (g_ucConnectMode == 2)
     {
         g_dlg[dlgId].MsgRow[0][15] = 'X';
+        g_dlg[dlgId].MsgRow[1][15] = 'X';
+        g_dlg[dlgId].MsgRow[2][15] = 'X';
+        g_dlg[dlgId].MsgRow[3][15] = 'X';
     }
     else
     {
         g_dlg[dlgId].MsgRow[0][15] = ' ';
+        g_dlg[dlgId].MsgRow[1][15] = ' ';
+        g_dlg[dlgId].MsgRow[2][15] = ' ';
+        g_dlg[dlgId].MsgRow[3][15] = ' ';
     }
 
     for (i = 0; i < 4; i++)
@@ -462,17 +464,17 @@ void doShowConnectModeSet (u8 dlg_id, u8 isNotRow, void * p_parm)
             {
                 g_dlg[dlgId].highLightRow--;
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
-                g_ucConnectMode = g_dlg[dlgId].highLightRow;
-                STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
+                //g_ucConnectMode = g_dlg[dlgId].highLightRow;
+                //STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
             }
             break;
         case KEY_DOWN:
-            if (2 > g_dlg[dlgId].highLightRow)
+            if (3 > g_dlg[dlgId].highLightRow)
             {
                 g_dlg[dlgId].highLightRow++;
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
-                g_ucConnectMode = g_dlg[dlgId].highLightRow;
-                STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
+                //g_ucConnectMode = g_dlg[dlgId].highLightRow;
+                //STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
             }
             break;
         case KEY_LEFT:
@@ -480,21 +482,31 @@ void doShowConnectModeSet (u8 dlg_id, u8 isNotRow, void * p_parm)
         case KEY_RIGHT:
             break;
         case KEY_OK:
-            /*
             switch (g_dlg[dlgId].highLightRow)
             {
                 case 1:
                     g_ucConnectMode = 1;
                     STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
+                    g_ucCurDlg = DLG_STATUS;
+                    g_ucIsUpdateMenu = 1;
                     break;
                 case 2:
                     g_ucConnectMode = 2;
                     STMFLASH_Write(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);
+                    g_ucCurDlg = DLG_STATUS;
+                    g_ucIsUpdateMenu = 1;
+                    break;
+                case 3:
+                    myCANTransmit(gt_TxMessage, 1, 1, SPIT_ONE_BAD_CARD, 1, 0, 0, NO_FAIL);
+                    myCANTransmit(gt_TxMessage, 2, 2, SPIT_ONE_BAD_CARD, 2, 0, 0, NO_FAIL);
+                    myCANTransmit(gt_TxMessage, 3, 3, SPIT_ONE_BAD_CARD, 3, 0, 0, NO_FAIL);
+                    myCANTransmit(gt_TxMessage, 4, 4, SPIT_ONE_BAD_CARD, 4, 0, 0, NO_FAIL);
+                    g_ucCurDlg = DLG_STATUS;
+                    g_ucIsUpdateMenu = 1;
                     break;
                 default:
                     break;
             }
-            */
             break;
         case KEY_QUIT:
             g_ucIsSetting = 0;
@@ -813,7 +825,7 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_DOWN:
-            if (g_dlg[dlgId].highLightRow < 2)
+            if (3 > g_dlg[dlgId].highLightRow)
             {
                 g_dlg[dlgId].highLightRow++;
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
@@ -845,6 +857,18 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
                 }
                 displayGB2312String (0, 0, g_dlg[dlgId].MsgRow[0], 0);
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
+            }
+            break;
+        case KEY_OK:
+            switch (g_dlg[dlgId].highLightRow)
+            {
+                case 3:
+                    myCANTransmit( gt_TxMessage, g_ucCurID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
+                    g_ucCurDlg = DLG_MAIN;
+                    g_ucIsUpdateMenu = 1;
+                    break;
+                default:
+                    break;
             }
             break;
         case KEY_QUIT:
@@ -1058,8 +1082,24 @@ while_label:
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
-            //g_ucIsSetting = 1;
             g_ucaFaultCode[faultCodeIndex] = 0;
+            switch(faultCodeIndex)
+            {
+                case 0:
+                    g_tCardMechineStatusFrame.CARD_MECHINE1.status = '0';
+                    break;
+                case 1:
+                    g_tCardMechineStatusFrame.CARD_MECHINE2.status = '0';
+                    break;
+                case 2:
+                    g_tCardMechineStatusFrame.CARD_MECHINE3.status = '0';
+                    break;
+                case 3:
+                    g_tCardMechineStatusFrame.CARD_MECHINE4.status = '1';
+                    break;
+                default :
+                    break;
+            }
             myCANTransmit(gt_TxMessage, num, NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, faultCode);
             for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
             {

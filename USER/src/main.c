@@ -11,6 +11,7 @@ u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
 u8 g_ucDownBackingID    = 4;            // 下工位备用卡机号
+u8 g_ucLockPressKey     = 0;            // 按键锁定
 u8 g_ucRepeatKeyMechine = 0;            // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
 u8 g_ucBadCardCount     = 0;            // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 u8 g_ucaCardIsReady[4]  = {0, 0, 0, 0}; // 卡就绪
@@ -143,25 +144,27 @@ int main( void )
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
-
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL ); // 设置备用态
+                                                                                              
+    //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+    //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+    //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+    //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
 
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
 
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+
+    printf ("the code version %s,%s", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
     printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
 
-    g_siMsgTime = 2000;      // 2秒查询一次卡机状态
+    g_siCycleAskMsgTime = 2000;      // 2秒查询一次卡机状态
     g_siKeyPressTime = 2000; // 2秒复位连续按键值
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);

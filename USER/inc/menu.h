@@ -9,7 +9,7 @@ typedef enum DLG_ID
     DLG_LOGO                     = 1,                 /*  */
     DLG_STATUS                   = 2,                 /*  */
     DLG_MAIN                     = 3,                 /*  */
-    DLG_PASS                     = 4,                 /*  */
+    DLG_PASSWD                   = 4,                 /*  */
     DLG_CARD_ID                  = 5,                 /*  */
     DLG_WORKING_SET              = 6,                 /*  */
 

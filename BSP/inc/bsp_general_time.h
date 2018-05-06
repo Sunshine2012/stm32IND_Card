@@ -58,8 +58,10 @@
 /**************************函数声明********************************/
 
 extern s32 g_siKeyTime;       // 按键状态计时变量
-extern s32 g_siMsgTime;       // ms 计时变量
+extern s32 g_siCycleAskMsgTime;       // ms 计时变量
 extern s32 g_siKeyPressTime;
+extern s32 g_siKeyMsgLockTime; // 卡机按键上报状态的锁定时间
+extern s32 g_siRepeatKeyValueTime;  // 重复发送按键值给PC的间隔时间
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);

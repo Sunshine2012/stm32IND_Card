@@ -2,8 +2,10 @@
 #include "bsp_general_time.h"
 
 s32 g_siKeyTime = 0;  // 按键状态计时变量
-s32 g_siMsgTime = 0;  // ms 计时变量
+s32 g_siCycleAskMsgTime = 0;  // ms 计时变量
+s32 g_siKeyMsgLockTime = 0; // 卡机按键上报状态的锁定时间
 s32 g_siKeyPressTime = 0;
+s32 g_siRepeatKeyValueTime = 0;  // 重复发送按键值给PC的间隔时间
 
 /**
   * @brief  This function handles TIM interrupt request.
@@ -43,12 +45,20 @@ void  GENERAL_TIM2_IRQHandler (void)
         g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
         g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
         g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+        printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );// 2秒上报一次系统消息
 
-        //if (timeMsg == 2)    // 2秒上报一次系统消息
+        if ( g_siCycleAskMsgTime > 0 )
         {
-            //timeMsg = 0;
-            printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
+            if ( --g_siCycleAskMsgTime == 0 )
+            {
+                g_siCycleAskMsgTime = 2;
+                myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+            }
         }
+
     }
 }
 /**
@@ -72,24 +82,30 @@ void  GENERAL_TIM3_IRQHandler (void)
             }
         }
 
-        if ( g_siMsgTime > 0)
+        if ( g_siKeyPressTime > 0 )
         {
-            if ( --g_siMsgTime == 0)
-            {
-                //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-                //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-                //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-                //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-                g_siMsgTime = 2000;
-            }
-        }
-
-        if (g_siKeyPressTime > 0)
-        {
-            if ( --g_siKeyPressTime == 0)
+            if ( --g_siKeyPressTime == 0 )
             {
                 g_siKeyPressTime = 2000;
                 g_ucKeyPressCount = 0;
+            }
+        }
+
+        if ( g_siKeyMsgLockTime > 0)
+        {
+            if ( --g_siKeyMsgLockTime == 0 )
+            {
+                g_ucaDeviceIsSTBY[0] = 1;
+                g_ucaDeviceIsSTBY[1] = 1;
+                g_ucaDeviceIsSTBY[2] = 1;
+                g_ucaDeviceIsSTBY[3] = 1;
+            }
+        }
+        if ( g_siRepeatKeyValueTime > 0 )
+        {
+            if ( --g_siRepeatKeyValueTime == 0)
+            {
+                printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
             }
         }
     }

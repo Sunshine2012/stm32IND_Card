@@ -94,6 +94,7 @@ extern u8 g_ucUpWorkingID;       // 上工位工作卡机号
 extern u8 g_ucUpBackingID;       // 上工位备用卡机号
 extern u8 g_ucDownWorkingID;     // 下工位工作卡机号
 extern u8 g_ucDownBackingID;     // 下工位备用卡机号
+extern u8 g_ucLockPressKey;      // 按键锁定
 extern u8 g_ucaCardIsReady[4];   // 卡就绪
 extern u8 g_ucaFaultCode[4];     // 卡机是否有未处理的故障
 extern u8 g_ucaDeviceIsSTBY[4];  // 两个卡机处于待机(Standby)状态下,按键按下,主机收到按键信息发卡,只要有卡没有被取走,即使收到按键信息,也不再发卡.
