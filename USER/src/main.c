@@ -1,7 +1,7 @@
 #include <includes.h>
 
 u8 g_ucConnectMode      = 1;            // 1为联机模式,其他为单机测试模式
-u8 g_ucIsSetting        = 0;            // 如果有人在操作界面的时候,新来的报警都处于后台显示,当处理完成之后
+u8 g_ucIsSetting        = 0;            // 如果有人在操作界面的时候,新来的报警都处于后台显示,当处理完成之后再显示
 u8 g_ucIsUpdateMenu     = 0;            // 更新显示
 u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
 u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
@@ -11,12 +11,13 @@ u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
 u8 g_ucDownBackingID    = 4;            // 下工位备用卡机号
+u8 g_ucCurOutCardId     = 1;            // 当前出卡的卡机号
 u8 g_ucLockPressKey     = 0;            // 按键锁定
 u8 g_ucRepeatKeyMechine = 0;            // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
 u8 g_ucBadCardCount     = 0;            // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 u8 g_ucaCardIsReady[4]  = {0, 0, 0, 0}; // 卡就绪
 u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
-u8 g_ucaDeviceIsSTBY[4] = {1, 1, 1, 1}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
+u8 g_ucaDeviceStatus[4] = {0, 0, 0, 0}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
 
@@ -26,6 +27,10 @@ CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
 CanRxMsg  g_tCanRxMsg = {0};          // CAN数据出队元素
 u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
+
+u32 g_uiSerNum = 0;     // 帧序号,全局,卡机与主机之间的帧序号
+u32 g_uiSerNumPC = 0;   // 帧序号,全局,PC与主机之间的帧序号
+u32 g_uiCurNum = 0;     // 作为当前帧号的比对,如果帧序号不对,则代表数据丢失
 
 
 typedef enum {FALSE = 0, TRUE = !FALSE} STATE;
@@ -85,8 +90,13 @@ void lcdRef()
 
         switch ( g_ucCurDlg )
         {
+
             case DLG_STATUS:
                 doShowStatusMenu( DLG_STATUS, 5, NULL ); // 显示主界面菜单,当前状态
+                break;
+
+            case DLG_EMPLOYEE_MENU:
+                doShowEmployeeMenu( DLG_EMPLOYEE_MENU, 5, NULL ); // 显示主界面菜单,当前状态
                 break;
 
             case DLG_MAIN:
@@ -134,17 +144,16 @@ int main( void )
 
 {
     u8 ret = 0;
+    u8 i = 0;
 
     bspInit();
 
     printf ("%s","你好,欢迎使用乐为电子板卡系统");
 
-    doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
-
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
-                                                                                              
+
     //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
     //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
     //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
@@ -155,25 +164,36 @@ int main( void )
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
 
-    //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+
 
     printf ("the code version %s,%s", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
     printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
 
-    g_siCycleAskMsgTime = 2000;      // 2秒查询一次卡机状态
-    g_siKeyPressTime = 2000; // 2秒复位连续按键值
+    for ( i = 0; i < 4; i++)
+    {
+        if (0 == g_ucaMechineExist[i])
+        {
+        copyMenu ( i + 1, DISCONNECTED, 0, 8, 4 );
+        }
+    }
+
+    doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
+
+    g_siCycleAskMsgTime = 2;      // 4秒查询一次卡机状态
+    //g_siKeyPressTime = 0; // 2秒复位连续按键值
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
 
-
     while ( 1 )
     {
+
         ret = canOutQueue( &g_tCanRxQueue, &g_tCanRxMsg );
 
         if ( 0 == ret )
@@ -192,7 +212,7 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-        delayMs (5);
+        delayMs (1);
     }
 }
 

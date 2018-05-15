@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_projx.xsd">
+<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_proj.xsd">
 
-  <SchemaVersion>2.1</SchemaVersion>
+  <SchemaVersion>1.1</SchemaVersion>
 
   <Header>### uVision Project, (C) Keil Software</Header>
 
   <Targets>
     <Target>
-      <TargetName>CARD</TargetName>
+      <TargetName>STM32</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F103RB</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F1xx_DFP.1.0.5</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IROM(0x08000000,0x20000) IRAM(0x20000000,0x5000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000-0x20004FFF) IROM(0x8000000-0x801FFFF) CLOCK(8000000) CPUTYPE("Cortex-M3")</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F10x_128 -FS08000000 -FL020000 -FP0($$Device:STM32F103RB$Flash\STM32F10x_128.FLM))</FlashDriverDll>
+          <StartupFile>"STARTUP\ST\STM32F10x\startup_stm32f10x_md.s" ("STM32 Medium Density Line Startup Code")</StartupFile>
+          <FlashDriverDll>UL2CM3(-O14 -S0 -C0 -N00("ARM Cortex-M3") -D00(1BA00477) -L00(4) -FO7 -FD20000000 -FC800 -FN1 -FF0STM32F10x_128 -FS08000000 -FL020000)</FlashDriverDll>
           <DeviceId>4231</DeviceId>
-          <RegisterFile>$$Device:STM32F103RB$Device\Include\stm32f10x.h</RegisterFile>
+          <RegisterFile>stm32f10x.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -31,14 +29,13 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:STM32F103RB$SVD\STM32F103xx.svd</SFDFile>
-          <bCustSvd>0</bCustSvd>
+          <SFDFile>SFD\ST\STM32F1xx\STM32F103xx.sfr</SFDFile>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
           <IncludePath></IncludePath>
           <LibPath></LibPath>
-          <RegisterFilePath></RegisterFilePath>
-          <DBRegisterFilePath></DBRegisterFilePath>
+          <RegisterFilePath>ST\STM32F10x\</RegisterFilePath>
+          <DBRegisterFilePath>ST\STM32F10x\</DBRegisterFilePath>
           <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
@@ -46,14 +43,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>..\OBJ\</OutputDirectory>
+          <OutputDirectory>.\out\</OutputDirectory>
           <OutputName>STM32</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath>..\OBJ\</ListingPath>
+          <ListingPath>.\list\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -74,13 +71,11 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
-            <nStopB1X>0</nStopB1X>
-            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>1</RunUserProg1>
+            <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf.exe --bin -o "$L@L.bin" "#L"</UserProg1Name>
+            <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -102,7 +97,6 @@
           <StopOnExitCode>3</StopOnExitCode>
           <CustomArgument></CustomArgument>
           <IncludeLibraryModules></IncludeLibraryModules>
-          <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
@@ -123,7 +117,7 @@
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
           <Simulator>
-            <UseSimulator>0</UseSimulator>
+            <UseSimulator>1</UseSimulator>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
             <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
@@ -132,22 +126,20 @@
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
-            <UseTarget>1</UseTarget>
+            <UseTarget>0</UseTarget>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
+            <RunToMain>0</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>0</RestoreTracepoints>
-            <RestoreSysVw>1</RestoreSysVw>
+            <RestoreTracepoints>1</RestoreTracepoints>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>6</TargetSelection>
+          <TargetSelection>1</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -161,7 +153,7 @@
             <PeripheralDll></PeripheralDll>
             <PeripheralDllArguments></PeripheralDllArguments>
             <InitializationFile></InitializationFile>
-            <Driver>Segger\JL2CM3.dll</Driver>
+            <Driver>BIN\UL2CM3.DLL</Driver>
           </TargetDlls>
         </DebugOption>
         <Utilities>
@@ -169,18 +161,14 @@
             <UseTargetDll>1</UseTargetDll>
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
-            <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
-            <Capability>1</Capability>
-            <DriverSelection>4096</DriverSelection>
+            <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
+            <Capability>0</Capability>
+            <DriverSelection>-1</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
-          <pFcarmOut></pFcarmOut>
-          <pFcarmGrp></pFcarmGrp>
-          <pFcArmRoot></pFcArmRoot>
-          <FcArmLst>0</FcArmLst>
         </Utilities>
         <TargetArmAds>
           <ArmAdsMisc>
@@ -224,7 +212,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>1</useUlib>
+            <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <RoSelD>3</RoSelD>
@@ -356,16 +344,14 @@
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
-            <wLevel>1</wLevel>
+            <wLevel>0</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
-            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER,uart1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\FWlib\inc;..\..\Libraries\CMSIS;..\..\BSP\inc;..\..\USER\inc</IncludePath>
+              <IncludePath>..\..\BSP\inc;..\..\USER\inc;..\..\Libraries\FWlib\inc;..\..\BSP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -377,7 +363,6 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
-            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -394,7 +379,6 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
-            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -406,17 +390,27 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>USER</GroupName>
+          <GroupName>startup</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\USER\src\main.c</FilePath>
+              <FileName>startup_stm32f10x_md.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\Libraries\CMSIS\startup\startup_stm32f10x_md.s</FilePath>
             </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>src</GroupName>
+          <Files>
             <File>
               <FileName>frame.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\USER\src\frame.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\USER\src\main.c</FilePath>
             </File>
             <File>
               <FileName>menu.c</FileName>
@@ -431,7 +425,7 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>BSP</GroupName>
+          <GroupName>bsp</GroupName>
           <Files>
             <File>
               <FileName>bsp_can.c</FileName>
@@ -444,19 +438,29 @@
               <FilePath>..\..\BSP\src\bsp_dac.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\BSP\src\bsp_delay.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\BSP\src\bsp_exti.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_font_flash.c</FileName>
+              <FileName>bsp_general_time.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_font_flash.c</FilePath>
+              <FilePath>..\..\BSP\src\bsp_general_time.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_lcd12864.c</FileName>
+              <FileName>bsp_i2c2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_lcd12864.c</FilePath>
+              <FilePath>..\..\BSP\src\bsp_i2c2.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\BSP\src\bsp_iwdg.c</FilePath>
             </File>
             <File>
               <FileName>bsp_led.c</FileName>
@@ -469,14 +473,14 @@
               <FilePath>..\..\BSP\src\bsp_matrix_key.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_stm_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\BSP\src\bsp_stm_flash.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_usart1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\BSP\src\bsp_usart1.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_delay.c</FilePath>
             </File>
             <File>
               <FileName>Queue.c</FileName>
@@ -484,29 +488,24 @@
               <FilePath>..\..\BSP\src\Queue.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_iwdg.c</FileName>
+              <FileName>bsp_spi_flash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_iwdg.c</FilePath>
+              <FilePath>..\..\BSP\src\bsp_spi_flash.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_i2c2.c</FileName>
+              <FileName>bsp_lcd12864.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_i2c2.c</FilePath>
+              <FilePath>..\..\BSP\src\bsp_lcd12864.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_general_time.c</FileName>
+              <FileName>bsp_font_flash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_general_time.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_stm_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\BSP\src\bsp_stm_flash.c</FilePath>
+              <FilePath>..\..\BSP\src\bsp_font_flash.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>CORE</GroupName>
+          <GroupName>lib</GroupName>
           <Files>
             <File>
               <FileName>core_cm3.c</FileName>
@@ -514,24 +513,64 @@
               <FilePath>..\..\Libraries\CMSIS\core_cm3.c</FilePath>
             </File>
             <File>
+              <FileName>core_cm3.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Libraries\CMSIS\core_cm3.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Libraries\CMSIS\stm32f10x.h</FilePath>
+            </File>
+            <File>
               <FileName>system_stm32f10x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\CMSIS\system_stm32f10x.c</FilePath>
             </File>
             <File>
-              <FileName>startup_stm32f10x_hd.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\Libraries\CMSIS\startup\startup_stm32f10x_hd.s</FilePath>
+              <FileName>system_stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Libraries\CMSIS\system_stm32f10x.h</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>FWLib</GroupName>
-          <Files>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_bkp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_bkp.c</FilePath>
+            </File>
             <File>
               <FileName>stm32f10x_can.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_can.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_cec.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_cec.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_dac.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_dbgmcu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_dbgmcu.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_dma.c</FileName>
@@ -549,6 +588,11 @@
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_flash.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f10x_fsmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_fsmc.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f10x_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_gpio.c</FilePath>
@@ -559,9 +603,29 @@
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_i2c.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f10x_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_iwdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_pwr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_pwr.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f10x_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_rcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_sdio.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_spi.c</FileName>
@@ -583,25 +647,7 @@
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\FWlib\src\stm32f10x_wwdg.c</FilePath>
             </File>
-            <File>
-              <FileName>misc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Libraries\FWlib\src\misc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_dac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_dac.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_iwdg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Libraries\FWlib\src\stm32f10x_iwdg.c</FilePath>
-            </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>README</GroupName>
         </Group>
       </Groups>
     </Target>

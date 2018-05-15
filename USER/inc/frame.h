@@ -268,26 +268,14 @@ typedef enum CARD_AND_MECHINE_STATUS
     CARD_OUT_SENSOR_OK         = 0x8c,                 /* 取卡传感器状态正常 */
     CARD_OUT_SENSOR_FAULT      = 0x8d,                 /* 取卡传感器状态故障 */
 
+    DISCONNECTED               = 0xfc,                 /* 断线 */
+
 }CARD_AND_MECHINE_STATUS;
 
 // 故障码：00--无故障
 typedef enum FAULT_CODE
 {
-#if 0
-    NO_FAIL                     = 0x00,                 /*  */
-    CAN_IS_FAIL                 = 0x01,                 /* CAN总线故障 */
-    OUT_CARD_ELE_MOTOR_FAIL     = 0x02,                 /* 出卡电机故障 */
-    TURN_CARD_ELE_MOTOR_FAIL    = 0x03,                 /* 翻卡电机故障 */
-    OUT_CARD_SENSOR_FAIL        = 0x04,                 /* 出卡传感器故障 */
-    TURN_CARD_SENSOR_FAIL       = 0x05,                 /* 翻卡传感器故障 */
-    CHECK_CARD_SENSOR_FAIL      = 0x06,                 /* 测卡传感器故障 */
-    CARD_BOX_SENSOR_FAIL        = 0x07,                 /* 卡箱传感器故障 */
-    CARD_OUT_SENSOR_FAIL        = 0x08,                 /* 取卡传感器故障 */
-    CARD_CLIP_SENSOR_FAIL       = 0x09,                 /* 卡盒传感器故障 */
-    TURN_CARD_FAIL              = 0x0a,                 /* 翻卡失败(卡在卡盒中出不来) */
-    RS232_FAIL                  = 0x0b,                 /* RS232通信故障 */
-    ULTRASONIC_FAIL             = 0x0c,                 /* 雷达测距故障 */
-#endif
+
     NO_FAIL                     = 0x00,                 /* 无故障 */
     FAULT_CODE01                = 0x01,                 /* 初始化勾卡电机不能回位 */
     FAULT_CODE02                = 0x02,                 /* 初始化翻卡电机反转不能回位 */

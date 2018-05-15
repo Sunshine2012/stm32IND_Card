@@ -3,10 +3,6 @@
 
 #include <includes.h>
 
-extern u32 g_uiSerNum; // 帧序号,全局,卡机与主机之间的帧序号
-extern u32 g_uiSerNumPC; // 帧序号,全局,PC与主机之间的帧序号
-
-
 typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
 

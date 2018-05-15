@@ -2,11 +2,12 @@
 #include "bsp_general_time.h"
 
 s32 g_siKeyTime = 0;  // 按键状态计时变量
-s32 g_siCycleAskMsgTime = 0;  // ms 计时变量
-s32 g_siKeyMsgLockTime = 0; // 卡机按键上报状态的锁定时间
-s32 g_siKeyPressTime = 0;
-s32 g_siRepeatKeyValueTime = 0;  // 重复发送按键值给PC的间隔时间
-
+s32 g_siCycleAskMsgTime = 0;    // ms 计时变量
+//s32 g_siKeyMsgLockTime = 0;     // 卡机按键上报状态的锁定时间
+s32 g_siStatusOverTimeS = 0;    // 发卡机状态短超时
+s32 g_siStatusOverTimeL = 0;    // 发卡机状态长超时
+s32 g_siKeyPressTime = 0;       // 锁定按键的时间
+//s32 g_siRepeatKeyValueTime = 0; // 重复发送按键值给PC的间隔时间
 /**
   * @brief  This function handles TIM interrupt request.
   * @param  None
@@ -23,29 +24,34 @@ void  GENERAL_TIM2_IRQHandler (void)
         g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[2] = g_uiaInitCardCount[1] % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaHasBadCard[0] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaFaultCode[0] > 0 ? '1' : '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[0] = g_uiaInitCardCount[2] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[1] = g_uiaInitCardCount[2] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[2] = g_uiaInitCardCount[2] % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaHasBadCard[1] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaFaultCode[1] > 0 ? '1' : '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[0] = g_uiaInitCardCount[3] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[1] = g_uiaInitCardCount[3] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[2] = g_uiaInitCardCount[3] % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
-        g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[1] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[2] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaFaultCode[2] > 0 ? '1' : '0';
 
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[0] = g_uiaInitCardCount[4] / 100 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[1] = g_uiaInitCardCount[4] / 10 % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[2] = g_uiaInitCardCount[4] % 10 + '0';
         g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
-        g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[1] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[3] ? '2' : '0';
+        g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaFaultCode[3] > 0 ? '1' : '0';
 
         g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
         g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
         g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
         printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );// 2秒上报一次系统消息
+
 
         if ( g_siCycleAskMsgTime > 0 )
         {
@@ -59,6 +65,7 @@ void  GENERAL_TIM2_IRQHandler (void)
             }
         }
 
+
     }
 }
 /**
@@ -68,16 +75,18 @@ void  GENERAL_TIM2_IRQHandler (void)
   */
 void  GENERAL_TIM3_IRQHandler (void)
 {
-    // 1ms中断一次
+    // 10ms中断一次
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
 
         if ( g_siKeyTime > 0 )
         {
-            if ( ( --g_siKeyTime == 0) && ( g_ucIsSetting != 0 ) )
+            if ( ( --g_siKeyTime == 0) )//&& ( g_ucIsSetting != 0 )
             {
+
                 g_ucIsSetting = 0;
+                g_ucCurDlg = DLG_STATUS;
                 g_ucIsUpdateMenu = 1;
             }
         }
@@ -86,28 +95,49 @@ void  GENERAL_TIM3_IRQHandler (void)
         {
             if ( --g_siKeyPressTime == 0 )
             {
-                g_siKeyPressTime = 2000;
+                g_siKeyPressTime = 200;
                 g_ucKeyPressCount = 0;
             }
         }
 
-        if ( g_siKeyMsgLockTime > 0)
+        if ( g_siStatusOverTimeL > 0)
         {
-            if ( --g_siKeyMsgLockTime == 0 )
+            if ( --g_siStatusOverTimeL == 0 )
             {
-                g_ucaDeviceIsSTBY[0] = 1;
-                g_ucaDeviceIsSTBY[1] = 1;
-                g_ucaDeviceIsSTBY[2] = 1;
-                g_ucaDeviceIsSTBY[3] = 1;
+                g_ucaDeviceStatus[0] = 0;
+                g_ucaDeviceStatus[1] = 0;
+                g_ucaDeviceStatus[2] = 0;
+                g_ucaDeviceStatus[3] = 0;
             }
         }
+        if ( g_siStatusOverTimeS > 0)
+        {
+            if ( --g_siStatusOverTimeS == 0 )
+            {
+                switch (g_ucaDeviceStatus[g_ucCurOutCardId - 1])
+                {
+                    case 1:
+                        printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
+                        break;
+                    case 2:
+                        myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                        break;
+                    case 3:
+                        myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        /*
         if ( g_siRepeatKeyValueTime > 0 )
         {
             if ( --g_siRepeatKeyValueTime == 0)
             {
                 printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
             }
-        }
+        }*/
     }
 }
 

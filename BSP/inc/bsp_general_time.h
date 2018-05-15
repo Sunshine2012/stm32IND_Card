@@ -27,7 +27,7 @@
 #define            GENERAL_TIM3                   TIM3
 #define            GENERAL_TIM3_APBxClock_FUN     RCC_APB1PeriphClockCmd
 #define            GENERAL_TIM3_CLK               RCC_APB1Periph_TIM3
-#define            GENERAL_TIM3_Period            (1000-1)      // 1ms 中断
+#define            GENERAL_TIM3_Period            (10000-1)      // 10ms 中断
 #define            GENERAL_TIM3_Prescaler         71
 #define            GENERAL_TIM3_IRQ               TIM3_IRQn
 #define            GENERAL_TIM3_IRQHandler        TIM3_IRQHandler
@@ -57,11 +57,13 @@
 #endif
 /**************************函数声明********************************/
 
-extern s32 g_siKeyTime;       // 按键状态计时变量
-extern s32 g_siCycleAskMsgTime;       // ms 计时变量
-extern s32 g_siKeyPressTime;
-extern s32 g_siKeyMsgLockTime; // 卡机按键上报状态的锁定时间
-extern s32 g_siRepeatKeyValueTime;  // 重复发送按键值给PC的间隔时间
+extern s32 g_siKeyTime;                 // 按键状态计时变量
+extern s32 g_siCycleAskMsgTime;         // ms 计时变量
+//extern s32 g_siKeyMsgLockTime;          // 卡机按键上报状态的锁定时间
+extern s32 g_siStatusOverTimeS;         // 发卡机状态短超时
+extern s32 g_siStatusOverTimeL;         // 发卡机状态长超时
+extern s32 g_siKeyPressTime;            // 锁定按键的时间
+//extern s32 g_siRepeatKeyValueTime;      // 重复发送按键值给PC的间隔时间
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);

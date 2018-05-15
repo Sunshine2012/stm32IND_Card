@@ -2,9 +2,6 @@
 
 CanTxMsg gt_TxMessage;      // CAN发送数据缓存
 
-u32 g_uiSerNum = 0; // 帧序号,全局,卡机与主机之间的帧序号
-u32 g_uiSerNumPC = 0; // 帧序号,全局,PC与主机之间的帧序号
-
 static void CAN_GPIO_Config(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -103,13 +100,13 @@ u8 myCANTransmit_ID(CanTxMsg mMsg, u8 targetID, u8 mechineID, u8 boxNum, u8 cmd,
 
     TransmitMailbox = CAN_Transmit(CAN1,&mMsg);
     i = 0;
-    while((CAN_TransmitStatus(CAN1,TransmitMailbox) != CANTXOK) && (i != 0xFF))
+    while((CAN_TransmitStatus(CAN1,TransmitMailbox) != CANTXOK) && (i <= 0xffff))
     {
         i++;
     }
 
     i = 0;
-    while((CAN_MessagePending(CAN1,CAN_FIFO0) < 1) && (i != 0xFF))
+    while((CAN_MessagePending(CAN1,CAN_FIFO0) < 1) && (i <= 0xffff))
     {
         i++;
     }
@@ -137,13 +134,13 @@ u8 myCANTransmit (CanTxMsg mMsg, u8 mechine_id, u8 boxNum, u8 cmd, u8 status,
     mMsg.Data[5] = data_H;
     mMsg.Data[6] = data_L;
     mMsg.Data[7] = errNum;
-    while((CAN_TransmitStatus(CAN1,TransmitMailbox) != CANTXOK) && (i != 0xFFFF))
+    while((CAN_TransmitStatus(CAN1,TransmitMailbox) != CANTXOK) && (i < 0xFFFF))
     {
         i++;
     }
 
     i = 0;
-    while((CAN_MessagePending(CAN1,CAN_FIFO0) < 1) && (i != 0xFFFF))
+    while((CAN_MessagePending(CAN1,CAN_FIFO0) < 1) && (i < 0xFFFF))
     {
         i++;
     }
@@ -295,10 +292,11 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     // CANTransmit (&gt_RxMessage);
     if(((0x0000ff00 & gt_RxMessage.ExtId) == 0x00007800) && (gt_RxMessage.IDE == CAN_ID_EXT))
     {
-        if (gt_RxMessage.Data[3] == SET_MECHINE_STATUS_ACK)
+        if ( SET_MECHINE_STATUS_ACK == gt_RxMessage.Data[3]  || CYCLE_ACK == gt_RxMessage.Data[3])
         {
             g_ucaMechineExist[gt_RxMessage.Data[1] - 1] = 1;
         }
+
         else if (gt_RxMessage.Data[3] == 0xaa)
         {
             switch (gt_RxMessage.Data[4])
@@ -350,5 +348,5 @@ void canInit( void )
     CAN_RCC_Config ();      // 初始化总线
     CAN_GPIO_Config ();     // 初始化GPIO,需要用到TX:PA12 ,RX:PA11
     CAN_NVIC_Config ();     // 接收中断
-    CAN_Interrupt();        // 设置波特率等其他参数
+    CAN_Interrupt ();       // 设置波特率等其他参数
 }

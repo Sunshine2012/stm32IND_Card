@@ -206,10 +206,10 @@ u8 matrixUpdateKey(void)
                 delayMs(1);
                 while(!GPIO_ReadInputDataBit(matrix_key_input[j].GPIO_x, matrix_key_input[j].GPIO_pin))
                 {
-                    delayMs(10);
+                    delayMs(5);
                     if (g_ucKeyContinue == 1)        // 以下是超时处理
                     {
-                        if (ucTime++ == 20)         // 如果是连续按键,20ms退出,加上进程延时10ms,共210ms发送一次按键
+                        if (ucTime++ == 20)         // 如果是连续按键,20ms退出,加上进程延时5ms,共205ms发送一次按键
                         {
                             ucTime = 0;
                             g_ucKeyContinue = 0;     // 连续模式按键,松开之后直接退出
@@ -228,7 +228,7 @@ u8 matrixUpdateKey(void)
                 }
                 GPIO_SetBits(matrix_key_output[i].GPIO_x, matrix_key_output[i].GPIO_pin);
                 g_ucKeyValues = (i + 1) * 10 + (j + 1);
-                g_siKeyTime = 10000;    // 10秒没有按键,且有故障的情况下,则显示故障
+                g_siKeyTime = 1000;    // 10秒没有按键,且有故障的情况下,则显示故障
                 return 0;
             }
         }

@@ -94,10 +94,11 @@ extern u8 g_ucUpWorkingID;       // 上工位工作卡机号
 extern u8 g_ucUpBackingID;       // 上工位备用卡机号
 extern u8 g_ucDownWorkingID;     // 下工位工作卡机号
 extern u8 g_ucDownBackingID;     // 下工位备用卡机号
+extern u8 g_ucCurOutCardId;      // 当前出卡的卡机号
 extern u8 g_ucLockPressKey;      // 按键锁定
 extern u8 g_ucaCardIsReady[4];   // 卡就绪
 extern u8 g_ucaFaultCode[4];     // 卡机是否有未处理的故障
-extern u8 g_ucaDeviceIsSTBY[4];  // 两个卡机处于待机(Standby)状态下,按键按下,主机收到按键信息发卡,只要有卡没有被取走,即使收到按键信息,也不再发卡.
+extern u8 g_ucaDeviceStatus[4];  // 两个卡机处于待机(Standby)状态下,按键按下,主机收到按键信息发卡,只要有卡没有被取走,即使收到按键信息,也不再发卡.
 extern u8 g_ucaMechineExist[4];  // 卡机是否存在并通信正常
 extern u8 g_ucaHasBadCard[4];    // 有坏卡
 extern u8 g_ucRepeatKeyMechine;  // 如果连续出现两张坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报按键值
@@ -113,6 +114,10 @@ extern UartQueue g_tUARTRxQueue;       // UART接收PC机数据队列
 extern CanRxMsg  g_tCanRxMsg;          // CAN数据出队元素
 extern u8 g_ucaUartRxMsg[50];          // UART数据出队元素
 
+
+extern u32 g_uiSerNum;      // 帧序号,全局,卡机与主机之间的帧序号
+extern u32 g_uiSerNumPC;    // 帧序号,全局,PC与主机之间的帧序号
+extern u32 g_uiCurNum;      // 作为当前帧号的比对,如果帧序号不对,则代表数据丢失
 /*
 *********************************************************************************************************
 *                                                 MACRO'S
