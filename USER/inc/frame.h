@@ -163,7 +163,9 @@ typedef struct Print_msg
 typedef enum CMD
 {
     // 00H--0FH£º³õÊ¼»¯¡¢¶¨Ê±À´ÍùÐÅÏ¢ÃüÁî
-    CARD_MACHINE_INIT       = 0x01,                 /* (Ö÷»ú--¡·¿¨»ú)³õÊ¼»¯ÃüÁî */
+
+    CARD_MACHINE_RESET      = 0x00,                 /* (Ö÷»ú--¡·¿¨»ú)¸´Î»ÃüÁî */
+    CARD_MACHINE_INIT       = 0x01,                 /* (Ö÷»ú--¡·¿¨»ú)³õÊ¼»¯Î»ÖÃÃüÁî */
     CARD_MACHINE_INIT_ACK   = 0x02,                 /* (¿¨»ú--¡·Ö÷»ú) ³õÊ¼»¯»Ø¸´¡£ÄÚÈÝÔÚ×´Ì¬ºÍ¹ÊÕÏÂëÄÚ */
     CYCLE_ASK               = 0x03,                 /* ¶¨Ê±Ñ¯ÎÊ */
     CYCLE_ACK               = 0x04,                 /* ¶¨Ê±»Ø¸´ */
@@ -268,7 +270,10 @@ typedef enum CARD_AND_MECHINE_STATUS
     CARD_OUT_SENSOR_OK         = 0x8c,                 /* È¡¿¨´«¸ÐÆ÷×´Ì¬Õý³£ */
     CARD_OUT_SENSOR_FAULT      = 0x8d,                 /* È¡¿¨´«¸ÐÆ÷×´Ì¬¹ÊÕÏ */
 
+
     DISCONNECTED               = 0xfc,                 /* ¶ÏÏß */
+
+    CONNECTED                  = 0xfe
 
 }CARD_AND_MECHINE_STATUS;
 
@@ -324,7 +329,7 @@ extern unsigned int g_uiaSpitCardCount[5];    // ³ö¿¨ÊýÁ¿,[0]Îª³ö¿¨×ÜÊýÁ¿,·¢1ÕÅ¿
 
 void antSwitch(u8 id);
 u8  analyzeCANFrame ( CanRxMsg arg );
-u8  analyzeUartFrame ( u8 argv[], u32 size );
+u8  analyzeUartFrame ( const u8 argv[], u32 size );
 u8 * checkShowFaultCode (u8 ch);
 u8 * checkShowStatusMsg (u8 ch);
 u8 * checkShowMsg (u8 ch);

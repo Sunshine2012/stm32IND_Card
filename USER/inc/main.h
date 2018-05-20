@@ -101,6 +101,9 @@ extern u8 g_ucaFaultCode[4];     // 卡机是否有未处理的故障
 extern u8 g_ucaDeviceStatus[4];  // 两个卡机处于待机(Standby)状态下,按键按下,主机收到按键信息发卡,只要有卡没有被取走,即使收到按键信息,也不再发卡.
 extern u8 g_ucaMechineExist[4];  // 卡机是否存在并通信正常
 extern u8 g_ucaHasBadCard[4];    // 有坏卡
+extern u8 g_ucaMasterStandbyStatus[4];  // 卡机的主备机状态
+extern u8 g_ucaStatus[4];        // 卡机的工作状态
+
 extern u8 g_ucRepeatKeyMechine;  // 如果连续出现两张坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报按键值
 extern u8 g_ucBadCardCount;      // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 

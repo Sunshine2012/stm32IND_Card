@@ -20,6 +20,8 @@ u8 g_ucaFaultCode[4]    = {0, 0, 0, 0}; // 卡机是否有未处理的故障
 u8 g_ucaDeviceStatus[4] = {0, 0, 0, 0}; // 上或下两个卡机处于待机(Standby)状态下,按键按下,主机收到两条按键信息,此时只处理主机的,如果只收到一条按键信息,则直接发卡
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
+u8 g_ucaMasterStandbyStatus[4]  = {0, 0, 0, 0};  // 卡机的主备机状态
+u8 g_ucaStatus[4]  = {0x0a, 0x0a, 0x0a, 0x0a};      // 卡机的工作状态
 
 u8 g_ucKeyPressCount = 0;                // 在2秒钟连续按键6次,则重启设备
 
@@ -76,9 +78,11 @@ void lcdRef()
 
         if ( 0 == g_ucIsSetting )
         {
-            if ( ( g_ucaFaultCode[0] != 0 ) || ( g_ucaFaultCode[1] != 0 ) || ( g_ucaFaultCode[2] != 0 ) || ( g_ucaFaultCode[3] != 0 ) )
+            if ( ( g_ucaFaultCode[0] != 0 ) || ( g_ucaFaultCode[1] != 0 ) \
+              || ( g_ucaFaultCode[2] != 0 ) || ( g_ucaFaultCode[3] != 0 ) )
             {
-                if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) || ( g_ucKeyValues == KEY_CANCEL ) || ( g_ucKeyValues == KEY_ENTRY ) )
+                if ( ( g_ucIsNewWarningCode == 1 ) || ( g_ucCurDlg != DLG_FAULT_CODE ) \
+                  || ( g_ucKeyValues == KEY_CANCEL ) || ( g_ucKeyValues == KEY_ENTRY ) )
                 {
                     doShowFaultCode( DLG_FAULT_CODE, 5, NULL );
                 }
@@ -145,7 +149,7 @@ int main( void )
 {
     u8 ret = 0;
     u8 i = 0;
-
+    g_ucIsSetting = 0;
     bspInit();
 
     printf ("%s","你好,欢迎使用乐为电子板卡系统");
@@ -159,33 +163,39 @@ int main( void )
     //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
     //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
 
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
 
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
 
+    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
+    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
+    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
+    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
 
-    printf ("the code version %s,%s", __DATE__,__TIME__); // 打印当前版本号和编译日期
+    printf ("the code version %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
-    printf ("%s",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
-
+    printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
+    delayMs( 100 ); // 等待卡机回复
     for ( i = 0; i < 4; i++)
     {
         if (0 == g_ucaMechineExist[i])
         {
-        copyMenu ( i + 1, DISCONNECTED, 0, 8, 4 );
+            //copyMenu ( i + 1, DISCONNECTED, 0, 8, 4 );
+            myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
+            g_ucaFaultCode[i] = FAULT_CODE11;
         }
     }
 
-    doShowStatusMenu( DLG_STATUS, 5, NULL );                                    // 显示菜单,需要反显示的行
+    g_siKeyTime = 100;
+
+    g_siaCheck[0] = 1200;
+    g_siaCheck[1] = 1200;
+    g_siaCheck[2] = 1200;
+    g_siaCheck[3] = 1200;
 
     g_siCycleAskMsgTime = 2;      // 4秒查询一次卡机状态
-    //g_siKeyPressTime = 0; // 2秒复位连续按键值
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
@@ -193,7 +203,6 @@ int main( void )
 
     while ( 1 )
     {
-
         ret = canOutQueue( &g_tCanRxQueue, &g_tCanRxMsg );
 
         if ( 0 == ret )
@@ -213,6 +222,7 @@ int main( void )
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
         delayMs (1);
+
     }
 }
 

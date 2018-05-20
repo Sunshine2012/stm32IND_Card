@@ -206,7 +206,7 @@ u8 matrixUpdateKey(void)
                 delayMs(1);
                 while(!GPIO_ReadInputDataBit(matrix_key_input[j].GPIO_x, matrix_key_input[j].GPIO_pin))
                 {
-                    delayMs(5);
+                    delayMs(10);
                     if (g_ucKeyContinue == 1)        // 以下是超时处理
                     {
                         if (ucTime++ == 20)         // 如果是连续按键,20ms退出,加上进程延时5ms,共205ms发送一次按键

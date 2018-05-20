@@ -171,7 +171,6 @@ void CANTransmit (void * p_Msg)
     }
 }
 
-
 /*******************************************************************************
 * Function Name  : CAN_Polling
 * Description    : Configures the CAN and transmit and receive by polling
@@ -292,12 +291,34 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     // CANTransmit (&gt_RxMessage);
     if(((0x0000ff00 & gt_RxMessage.ExtId) == 0x00007800) && (gt_RxMessage.IDE == CAN_ID_EXT))
     {
-        if ( SET_MECHINE_STATUS_ACK == gt_RxMessage.Data[3]  || CYCLE_ACK == gt_RxMessage.Data[3])
+        if ( CYCLE_ACK == gt_RxMessage.Data[3] )            // 定时查询是否有卡
+        {
+            if ( HAS_CARD  == gt_RxMessage.Data[4])
+            {
+                g_ucaCardIsReady[gt_RxMessage.Data[1] - 1] = 1;
+            }
+            else
+            {
+                g_ucaCardIsReady[gt_RxMessage.Data[1] - 1] = 0;
+            }
+            g_siaCheck[gt_RxMessage.Data[1] - 1] = 1200;        // 12秒没有收到卡机回复,发初始化命令,报警
+            g_ucaMasterStandbyStatus[gt_RxMessage.Data[1] - 1] = gt_RxMessage.Data[2];
+            g_ucaStatus[gt_RxMessage.Data[1] - 1] = gt_RxMessage.Data[7];
+
+            if ( FAULT_CODE11 == g_ucaFaultCode[gt_RxMessage.Data[1] - 1] )     // 如果之前是CAN总线故障，则清除故障
+            {
+                g_ucaFaultCode[gt_RxMessage.Data[1] - 1] = NO_FAIL;
+                copyMenu ( gt_RxMessage.Data[1], CONNECTED, 0, 8, 6 );
+                g_ucIsUpdateMenu    = 1;
+                g_ucCurDlg = DLG_STATUS;
+                myCANTransmit(gt_TxMessage, gt_RxMessage.Data[1], NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, FAULT_CODE11);   // 如果报告总线故障码,本机直接处理
+            }
+        }
+        else if ( SET_MECHINE_STATUS_ACK == gt_RxMessage.Data[3] )
         {
             g_ucaMechineExist[gt_RxMessage.Data[1] - 1] = 1;
         }
-
-        else if (gt_RxMessage.Data[3] == 0xaa)
+        else if ( 0xaa == gt_RxMessage.Data[3] )    // 调试命令
         {
             switch (gt_RxMessage.Data[4])
             {
@@ -333,7 +354,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
         {
             canInQueue (&g_tCanRxQueue, &gt_RxMessage);
         }
-
     }
     else
     {

@@ -306,7 +306,7 @@ void TmrCallback (OS_TMR *p_tmr, void *p_arg) //软件定时器MyTmr的回调函数
     //                    ts_end / ( cpu_clk_freq / 1000000 ),     //将定时时间折算成 us
     //                    ts_end / ( cpu_clk_freq / 1000 ) );      //将定时时间折算成 ms
 
-    printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );
+    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
     OS_CRITICAL_EXIT();
 
     ts_start = OS_TS_GET();                            //获取定时前时间戳
@@ -439,9 +439,9 @@ void  AppTaskUartFrame ( void * p_arg )
 
     OSTimeDly ( 1000, OS_OPT_TIME_DLY, & err );                 //等待1S
     OS_CRITICAL_ENTER();                                        // 进入临界段，不希望下面语句遭到中断
-    DEBUG_printf ("%s\n","你好,欢迎使用乐为电子板卡系统");
+    DEBUG_printf ( "%s\n","你好,欢迎使用乐为电子板卡系统" );
 
-    printf("%s\n", (char *)&g_tCardMechinePowerOnFrame);          // 上电信息
+    printf ( "%s\n", (char *)&g_tCardMechinePowerOnFrame );          // 上电信息
 
     OS_CRITICAL_EXIT();
 

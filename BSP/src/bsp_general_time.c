@@ -7,7 +7,12 @@ s32 g_siCycleAskMsgTime = 0;    // ms 计时变量
 s32 g_siStatusOverTimeS = 0;    // 发卡机状态短超时
 s32 g_siStatusOverTimeL = 0;    // 发卡机状态长超时
 s32 g_siKeyPressTime = 0;       // 锁定按键的时间
-//s32 g_siRepeatKeyValueTime = 0; // 重复发送按键值给PC的间隔时间
+s32 g_siOutCardMsgTime = 0;     // 重复发送翻卡信息的次数
+s32 g_siCardTakeMsgTime = 0;    // 重复发送取卡信息的次数
+s32 g_siCheckStatus = 0;        // 检查卡机的状态时间间隔
+s32 g_siaCheck[4] = {0};        // 检查卡机的通讯状态时间间隔
+
+
 /**
   * @brief  This function handles TIM interrupt request.
   * @param  None
@@ -50,7 +55,7 @@ void  GENERAL_TIM2_IRQHandler (void)
         g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
         g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
         g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-        printf ( "%s", ( char * ) &g_tCardMechineStatusFrame );// 2秒上报一次系统消息
+        printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );// 2秒上报一次系统消息
 
 
         if ( g_siCycleAskMsgTime > 0 )
@@ -59,12 +64,24 @@ void  GENERAL_TIM2_IRQHandler (void)
             {
                 g_siCycleAskMsgTime = 2;
                 myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //delayMs ( 1 );
                 myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //delayMs ( 1 );
                 myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+                //delayMs ( 1 );
                 myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+
+                g_ucaMasterStandbyStatus[0] = 0;
+                g_ucaMasterStandbyStatus[1] = 0;
+                g_ucaMasterStandbyStatus[2] = 0;
+                g_ucaMasterStandbyStatus[3] = 0;
+                g_ucaStatus[0] = 0x0a;
+                g_ucaStatus[1] = 0x0a;
+                g_ucaStatus[2] = 0x0a;
+                g_ucaStatus[3] = 0x0a;
+                g_siCheckStatus = 5;        // 收到定时轮询的信息之后,50ms发送一次检验主备机的状态
             }
         }
-
 
     }
 }
@@ -76,6 +93,7 @@ void  GENERAL_TIM2_IRQHandler (void)
 void  GENERAL_TIM3_IRQHandler (void)
 {
     // 10ms中断一次
+    static char i = 0;
     if ( TIM_GetITStatus( GENERAL_TIM3, TIM_IT_Update) != RESET )
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
@@ -84,7 +102,6 @@ void  GENERAL_TIM3_IRQHandler (void)
         {
             if ( ( --g_siKeyTime == 0) )//&& ( g_ucIsSetting != 0 )
             {
-
                 g_ucIsSetting = 0;
                 g_ucCurDlg = DLG_STATUS;
                 g_ucIsUpdateMenu = 1;
@@ -114,30 +131,165 @@ void  GENERAL_TIM3_IRQHandler (void)
         {
             if ( --g_siStatusOverTimeS == 0 )
             {
+
                 switch (g_ucaDeviceStatus[g_ucCurOutCardId - 1])
                 {
-                    case 1:
-                        printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
-                        break;
+                    //case 1:
+                    //    printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
+                    //    break;
                     case 2:
-                        myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
+                        //myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
                         break;
                     case 3:
-                        myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        if ( g_siOutCardMsgTime > 0)
+                        {
+                            g_siOutCardMsgTime--;
+                            g_siStatusOverTimeL = 1000;
+                            g_siStatusOverTimeS = 150;
+                            myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
+                        }
                         break;
+                    case 6:
+                        if ( g_siCardTakeMsgTime > 0)
+                        {
+                            g_siCardTakeMsgTime--;
+                            g_siStatusOverTimeL = 1000;
+                            g_siStatusOverTimeS = 100;
+                            g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+
+                            g_tCardTakeAwayFrame.MECHINE_ID = g_ucCurOutCardId + '0';
+                            g_tCardTakeAwayFrame.CARD_MECHINE = g_ucCurOutCardId < 3 ? '1' : '2';
+                            printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+
+                            g_uiCurNum = g_tCardTakeAwayFrame.RSCTL;
+                        }
+                        else
+                        {
+                            g_uiCurNum = 0;
+                        }
+                        break;
+
                     default:
                         break;
                 }
+
             }
         }
-        /*
-        if ( g_siRepeatKeyValueTime > 0 )
+        if ( g_siCheckStatus > 0 )
         {
-            if ( --g_siRepeatKeyValueTime == 0)
+            if ( --g_siCheckStatus == 0 )
             {
-                printf ( "%s", ( char * ) &g_tCardKeyPressFrame );
+                if ( ( WORKING_STATUS != g_ucaMasterStandbyStatus [0] ) \
+                  && ( WORKING_STATUS != g_ucaMasterStandbyStatus [1] ) ) // 都为备机
+                {
+                    if ( ( g_ucaStatus[0] == 0 )
+                      && ( g_ucaStatus[1] == 0 ) )
+                    {
+                        if ( 1 == g_ucUpWorkingID )
+                        {
+                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
+                        }
+                        else if ( 2 == g_ucUpWorkingID )
+                        {
+                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
+                        }
+                    }
+
+                }
+                if ( ( WORKING_STATUS != g_ucaMasterStandbyStatus [2] ) \
+                  && ( WORKING_STATUS != g_ucaMasterStandbyStatus [3] ) ) // 都为备机
+                {
+                    if ( ( g_ucaStatus[2] == 0 )
+                      && ( g_ucaStatus[3] == 0 ) )
+                    {
+                        if ( 3 == g_ucDownWorkingID )
+                        {
+                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
+                        }
+                        else if ( 4 == g_ucDownWorkingID )
+                        {
+                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
+                        }
+                    }
+
+                }
             }
-        }*/
+        }
+        for ( i = 0; i < 4; i++)
+        {
+            if ( g_siaCheck[i] > 0)
+            {
+               if ( --g_siaCheck[i] == 0 )
+               {
+                    g_siaCheck[i] = 1200;
+                    if ( 0x0a == g_ucaStatus [i] )
+                    {
+                        myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
+
+                        g_ucaFaultCode[i] = FAULT_CODE11;
+                        g_ucIsNewWarningCode = 1;
+                        g_ucIsSetting = 0;
+                        g_ucIsUpdateMenu = 1;
+
+                        switch ( i + 1 )
+                        {
+                            case 1:
+                                if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
+                                {
+                                    g_ucaMechineExist[0] = 0;
+                                    g_ucaMechineExist[1] = 0;
+                                    g_ucUpWorkingID     = 2;
+                                    g_ucUpBackingID     = 1;
+                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
+                                }
+                                break;
+                            case 2:
+                                if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
+                                {
+                                    g_ucaMechineExist[0] = 0;
+                                    g_ucaMechineExist[1] = 0;
+                                    g_ucUpWorkingID     = 1;
+                                    g_ucUpBackingID     = 2;
+                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
+                                }
+                                break;
+                            case 3:
+                                if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
+                                {
+                                    g_ucaMechineExist[2] = 0;
+                                    g_ucaMechineExist[3] = 0;
+                                    g_ucDownWorkingID   = 4;
+                                    g_ucDownBackingID   = 3;
+                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
+                                }
+                                break;
+                            case 4:
+                                if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
+                                {
+                                    g_ucaMechineExist[2] = 0;
+                                    g_ucaMechineExist[3] = 0;
+                                    g_ucDownWorkingID   = 3;
+                                    g_ucDownBackingID   = 4;
+                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
+                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
+
+                                 }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
 

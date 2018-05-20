@@ -219,7 +219,7 @@ extern unsigned char CGROM_YIFUYUAN[];
 void lcd12864Init( void ); //LCD YB12864ZB初始化
 void lcd12864Clear( void ); //LCD YB12864ZB清屏
 void LCD_WriteByte( u8 dat, u8 ord ); //LCD写入一个字节命令或者数据，判断忙标志
-void displayGB2312String( u8 x, u8 y, u8 * text, u8 isTurn ); //LCD显示字符串
+void displayGB2312String( u8 x, u8 y, const u8 * text, u8 isTurn ); //LCD显示字符串
 void displayGB2312StringLen( u8 x, u8 y, u8 * text, u8 isTurn, u8 len );
 void displayString( u8 x, u8 y, u8 * str, u8 len );
 void displayStringFromIndex( u8 x, u8 y, u8 * str, u8 starsum, u8 len );

@@ -225,10 +225,13 @@ u8 canOutQueue( CanQueue * const p_tQueue, CanRxMsg * p_tReturnNode )
         return 1;
     }
 
+    CAN_ITConfig(CAN1,CAN_IT_FMP0, DISABLE);
     // 数据出队列
     *p_tReturnNode = p_tQueue->news[p_tQueue->bottom];
     p_tQueue->bottom = ( p_tQueue->bottom + 1 ) % RX_DATA_BUFF_SIZE;
     p_tQueue->full = 0;
+    CAN_ITConfig(CAN1,CAN_IT_FMP0, ENABLE);
+
     return 0;
 }
 
@@ -321,10 +324,12 @@ u8 uartOutQueue( UartQueue * const p_tQueue, u8 * p_ucaReturnNode )
         p_tQueue->empty = 1;
         return 1;
     }
-
+    USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
     // 数据出队列
     strcpy( p_ucaReturnNode, p_tQueue->news[p_tQueue->bottom] );
     p_tQueue->bottom = ( p_tQueue->bottom + 1 ) % RX_DATA_BUFF_SIZE;
     p_tQueue->full = 0;
+    USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
+
     return 0;
 }

@@ -168,6 +168,13 @@ void macUSART1_IRQHandler( void )
 
             if(POSITIVE_ACK == g_rx_buf[2])      // 如果是正应答帧,不压栈
             {
+                if ( g_rx_buf[1] == g_uiCurNum ) //卡取走信息序号判断,如果序号
+                {
+                    g_uiCurNum = 0;
+                    g_siCardTakeMsgTime = 0;// 不再重发
+                    g_siStatusOverTimeS = 0;
+                    g_ucaDeviceStatus[g_ucCurOutCardId - 1] = 0;
+                }
                 g_num = 0;
                 g_rx_buf[g_num] = 0;
             }
@@ -182,7 +189,7 @@ void macUSART1_IRQHandler( void )
                 // 禁止串口接收中断
                 USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
                 g_tP_RsctlFrame.RSCTL = g_rx_buf[1];
-                printf("%s",(char *)&g_tP_RsctlFrame);   //发送正应答帧
+                printf ("%s\n",(char *)&g_tP_RsctlFrame);   //发送正应答帧
                 // 使能串口接收中断
                 USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
 
@@ -204,7 +211,7 @@ void macUSART1_IRQHandler( void )
                 // 禁止串口接收中断
                 USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
                 g_tN_RsctlFrame.RSCTL = g_rx_buf[1];
-                printf("%s",(char *)&g_tN_RsctlFrame);   //发送负应答帧
+                printf ("%s\n",(char *)&g_tN_RsctlFrame);   //发送负应答帧
                 // 使能串口接收中断
                 USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
 

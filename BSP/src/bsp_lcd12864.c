@@ -390,7 +390,7 @@ void displayCGRAM( u8 x, u8 y, u8 add_h, u8 add_l )
 * 返回数值 ---> none
 * 功能说明 ---> 可以从显示数组的任意位置starsum开始显示len长度的字符串
 **********************************************************/
-void displayGB2312String( u8 x, u8 y, u8 * text, u8 isTurn )
+void displayGB2312String( u8 x, u8 y, const u8 * text, u8 isTurn )
 {
     u8 i = 0;
 

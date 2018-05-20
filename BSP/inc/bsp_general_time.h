@@ -59,11 +59,16 @@
 
 extern s32 g_siKeyTime;                 // 按键状态计时变量
 extern s32 g_siCycleAskMsgTime;         // ms 计时变量
-//extern s32 g_siKeyMsgLockTime;          // 卡机按键上报状态的锁定时间
+//extern s32 g_siKeyMsgLockTime;        // 卡机按键上报状态的锁定时间
 extern s32 g_siStatusOverTimeS;         // 发卡机状态短超时
 extern s32 g_siStatusOverTimeL;         // 发卡机状态长超时
 extern s32 g_siKeyPressTime;            // 锁定按键的时间
-//extern s32 g_siRepeatKeyValueTime;      // 重复发送按键值给PC的间隔时间
+extern s32 g_siOutCardMsgTime;          // 重复发送翻卡信息的次数
+extern s32 g_siCardTakeMsgTime;         // 重复发送取卡信息的次数
+extern s32 g_siCheckStatus;             // 检查卡机的状态时间间隔
+extern s32 g_siaCheck[4];               // 检查卡机的通讯状态时间间隔
+
+
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);
