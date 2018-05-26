@@ -182,7 +182,6 @@ int main( void )
     {
         if (0 == g_ucaMechineExist[i])
         {
-            //copyMenu ( i + 1, DISCONNECTED, 0, 8, 4 );
             myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
             g_ucaFaultCode[i] = FAULT_CODE11;
         }

@@ -120,9 +120,22 @@ u8 myCANTransmit (CanTxMsg mMsg, u8 mechine_id, u8 boxNum, u8 cmd, u8 status,
 {
     u32 i = 0;
     u8 TransmitMailbox;
-
+    u8 ucMechineIdTemp;
+    switch( mechine_id )
+    {
+        case 1:
+        case 2:
+            ucMechineIdTemp = 0x01;
+            break;
+        case 3:
+        case 4:
+            ucMechineIdTemp = 0x02;
+            break;
+        default:
+            break;
+    }
     mMsg.StdId = 0x00;
-    mMsg.ExtId = 0x7810 | mechine_id;
+    mMsg.ExtId = 0x7810 | ucMechineIdTemp;
     mMsg.RTR = CAN_RTR_DATA;
     mMsg.IDE = CAN_ID_EXT;
     mMsg.DLC = 8;
@@ -293,6 +306,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     {
         if ( CYCLE_ACK == gt_RxMessage.Data[3] )            // 定时查询是否有卡
         {
+            g_ucaMechineExist[ gt_RxMessage.Data[1] - 1 ] = 1;
             if ( HAS_CARD  == gt_RxMessage.Data[4])
             {
                 g_ucaCardIsReady[gt_RxMessage.Data[1] - 1] = 1;
@@ -313,10 +327,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
                 g_ucCurDlg = DLG_STATUS;
                 myCANTransmit(gt_TxMessage, gt_RxMessage.Data[1], NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, FAULT_CODE11);   // 如果报告总线故障码,本机直接处理
             }
-        }
-        else if ( SET_MECHINE_STATUS_ACK == gt_RxMessage.Data[3] )
-        {
-            g_ucaMechineExist[gt_RxMessage.Data[1] - 1] = 1;
         }
         else if ( 0xaa == gt_RxMessage.Data[3] )    // 调试命令
         {

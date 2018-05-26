@@ -175,50 +175,6 @@ void  GENERAL_TIM3_IRQHandler (void)
 
             }
         }
-        if ( g_siCheckStatus > 0 )
-        {
-            if ( --g_siCheckStatus == 0 )
-            {
-                if ( ( WORKING_STATUS != g_ucaMasterStandbyStatus [0] ) \
-                  && ( WORKING_STATUS != g_ucaMasterStandbyStatus [1] ) ) // 都为备机
-                {
-                    if ( ( g_ucaStatus[0] == 0 )
-                      && ( g_ucaStatus[1] == 0 ) )
-                    {
-                        if ( 1 == g_ucUpWorkingID )
-                        {
-                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-                        }
-                        else if ( 2 == g_ucUpWorkingID )
-                        {
-                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-                        }
-                    }
-
-                }
-                if ( ( WORKING_STATUS != g_ucaMasterStandbyStatus [2] ) \
-                  && ( WORKING_STATUS != g_ucaMasterStandbyStatus [3] ) ) // 都为备机
-                {
-                    if ( ( g_ucaStatus[2] == 0 )
-                      && ( g_ucaStatus[3] == 0 ) )
-                    {
-                        if ( 3 == g_ucDownWorkingID )
-                        {
-                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-                        }
-                        else if ( 4 == g_ucDownWorkingID )
-                        {
-                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-                        }
-                    }
-
-                }
-            }
-        }
         for ( i = 0; i < 4; i++)
         {
             if ( g_siaCheck[i] > 0)
@@ -235,56 +191,6 @@ void  GENERAL_TIM3_IRQHandler (void)
                         g_ucIsSetting = 0;
                         g_ucIsUpdateMenu = 1;
 
-                        switch ( i + 1 )
-                        {
-                            case 1:
-                                if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 2;
-                                    g_ucUpBackingID     = 1;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 2:
-                                if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 1;
-                                    g_ucUpBackingID     = 2;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 3:
-                                if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 4;
-                                    g_ucDownBackingID   = 3;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 4:
-                                if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 3;
-                                    g_ucDownBackingID   = 4;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                                 }
-                                break;
-                            default:
-                                break;
-                        }
                     }
                 }
             }

@@ -299,57 +299,6 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                     {
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
                         g_ucaDeviceStatus[mtRxMessage.Data[1] -1] = 0;
-
-                        switch ( mtRxMessage.Data[1] )
-                        {
-                            case 1:
-                                if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 2;
-                                    g_ucUpBackingID     = 1;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 2:
-                                if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 1;
-                                    g_ucUpBackingID     = 2;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 3:
-                                if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 4;
-                                    g_ucDownBackingID   = 3;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                }
-                                break;
-                            case 4:
-                                if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 3;
-                                    g_ucDownBackingID   = 4;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                                 }
-                                break;
-                            default:
-                                break;
-                        }
                     }
                 }
             }
@@ -362,7 +311,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                     {
                         antSwitch(mtRxMessage.Data[1]); // 往工控机发送数据的同时,切换天线
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                        g_siStatusOverTimeL = 2000;
+                        g_siStatusOverTimeL = 300;
 
                         g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 3; // 按键发卡流程开始之后，再次按键不再响应
 
@@ -374,74 +323,12 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                     {
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
                         g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;
-                        /*
-                        switch ( mtRxMessage.Data[1] )
-                        {
-                            case 1:
-                                if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 2;
-                                    g_ucUpBackingID     = 1;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                                    g_siStatusOverTimeL = 2000;
-                                }
-                                break;
-                            case 2:
-                                if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[0] = 0;
-                                    g_ucaMechineExist[1] = 0;
-                                    g_ucUpWorkingID     = 1;
-                                    g_ucUpBackingID     = 2;
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                    myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                                    g_siStatusOverTimeL = 2000;
-                                }
-                                break;
-                            case 3:
-                                if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 4;
-                                    g_ucDownBackingID   = 3;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                                    g_siStatusOverTimeL = 2000;
-                                }
-                                break;
-                            case 4:
-                                if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
-                                {
-                                    g_ucaMechineExist[2] = 0;
-                                    g_ucaMechineExist[3] = 0;
-                                    g_ucDownWorkingID   = 3;
-                                    g_ucDownBackingID   = 4;
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                                    myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                                    myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                                    g_siStatusOverTimeL = 2000;
-                                 }
-                                break;
-                            default:
-                                break;
-                        }
-                        */
                     }
                 }
                 else
                 {
-                        //g_siStatusOverTimeL = 2000;
-                        //g_siKeyMsgLockTime = 100;
-                        //g_ucLockPressKey = 1;
-                        myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
-                        g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;
+                    myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, 0x10, 0, 0, NO_FAIL );
+                    g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;
                 }
             }
             break;
@@ -504,7 +391,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             {
                 g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
+                g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] / 2 + '1';
                 printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
 
                 g_uiCurNum = g_tCardTakeAwayFrame.RSCTL;
@@ -518,51 +405,6 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;  // 表明卡已经被取走,置位状态
             }
 
-            switch ( mtRxMessage.Data[1] )
-            {
-                case 1:
-                    if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
-                    {
-                        g_ucaMechineExist[0] = 0;
-                        g_ucUpWorkingID     = 2;
-                        g_ucUpBackingID     = 1;
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 2:
-                    if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
-                    {
-                        g_ucaMechineExist[1] = 0;
-                        g_ucUpWorkingID     = 1;
-                        g_ucUpBackingID     = 2;
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 3:
-                    if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
-                    {
-                        g_ucaMechineExist[2] = 0;
-                        g_ucDownWorkingID   = 4;
-                        g_ucDownBackingID   = 3;
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 4:
-                    if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
-                    {
-                        g_ucaMechineExist[3] = 0;
-                        g_ucDownWorkingID   = 3;
-                        g_ucDownBackingID   = 4;
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                default:
-                    break;
-            }
             //dacSet ( DATA_xiexie, SOUND_LENGTH_xiexie );
 
             copyMenu ( mtRxMessage.Data[1], CARD_TAKE_AWAY_NOTICE, 0, 8, 4 );
@@ -580,144 +422,29 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, FAULT_CODE_ACK, 0, 0, 0, NO_FAIL ); // 回复故障码
             if ( ( mtRxMessage.Data[2] != 0xff ) && ( mtRxMessage.Data[4] == 0x21 ) && ( mtRxMessage.Data[7] <= FAULT_CODE11 ) )
             {
-                switch ( mtRxMessage.Data[1] )
+
+                TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+                g_tCardMechineStatusFrame.CARD_MECHINE1.status = '1';
+
+                //if ( g_ucaDeviceStatus[0] > 0 )
+                if ( ( FAULT_CODE06 == g_ucaFaultCode[0] ) \
+                || ( FAULT_CODE07 == g_ucaFaultCode[0] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
                 {
-                    case 1:
-                        if ( (g_ucaFaultCode[1] == 0) && (g_ucaMechineExist[1] == 1) )   // 无故障,且通信正常
-                        {
-                            TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-                            g_tCardMechineStatusFrame.CARD_MECHINE1.status = '1';
-                            g_ucaMechineExist[0] = 0;
-                            g_ucaMechineExist[1] = 0;
-                            g_ucUpWorkingID     = 2;
-                            g_ucUpBackingID     = 1;
-                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                            //if ( g_ucaDeviceStatus[0] > 0 )
-                            if ( ( FAULT_CODE06 == g_ucaFaultCode[0] ) \
-                              || ( FAULT_CODE07 == g_ucaFaultCode[0] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
-                            {
-                                g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                                g_tCardSpitOutFrame.CARD_MECHINE = '3';
-                                g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
-                            }
-                            g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaFaultCode[0] > 0 ? '1' : '0';
-                            g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                            g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-
-                            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-
-                            g_ucaDeviceStatus[0] = 0;
-                        }
-                        break;
-                    case 2:
-                        if ( (g_ucaFaultCode[0] == 0) && (g_ucaMechineExist[0] == 1) )   // 无故障,且通信正常
-                        {
-                            TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-                            g_tCardMechineStatusFrame.CARD_MECHINE2.status = '1';
-                            g_ucaMechineExist[0] = 0;
-                            g_ucaMechineExist[1] = 0;
-                            g_ucUpWorkingID     = 1;
-                            g_ucUpBackingID     = 2;
-                            myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                            //if ( g_ucaDeviceStatus[1] > 0 )
-                            if ( ( FAULT_CODE06 == g_ucaFaultCode[1] ) \
-                              || ( FAULT_CODE07 == g_ucaFaultCode[1] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
-                            {
-                                g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                                g_tCardSpitOutFrame.CARD_MECHINE = '3';
-                                g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
-                            }
-
-                            g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaFaultCode[1] > 0 ? '1' : '0';
-                            g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                            g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-
-                            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-
-                            g_ucaDeviceStatus[1] = 0;
-                        }
-                        break;
-                    case 3:
-                        if ( (g_ucaFaultCode[3] == 0) && (g_ucaMechineExist[3] == 1) )   // 无故障,且通信正常
-                        {
-                            TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-                            g_tCardMechineStatusFrame.CARD_MECHINE3.status = '1';
-                            g_ucaMechineExist[2] = 0;
-                            g_ucaMechineExist[3] = 0;
-                            g_ucDownWorkingID   = 4;
-                            g_ucDownBackingID   = 3;
-                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                            //if ( g_ucaDeviceStatus[2] > 0 )
-                            if ( ( FAULT_CODE06 == g_ucaFaultCode[2] ) \
-                              || ( FAULT_CODE07 == g_ucaFaultCode[2] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
-                            {
-                                g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                                g_tCardSpitOutFrame.CARD_MECHINE = '3';
-                                g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
-                            }
-
-                            g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaFaultCode[2] > 0 ? '1' : '0';
-                            g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                            g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-
-                            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-
-                            g_ucaDeviceStatus[2] = 0;
-
-                        }
-                        break;
-                    case 4:
-                        if ( (g_ucaFaultCode[2] == 0) && (g_ucaMechineExist[2] == 1) )   // 无故障,且通信正常
-                        {
-                            TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-                            g_tCardMechineStatusFrame.CARD_MECHINE4.status = '1';
-                            g_ucaMechineExist[2] = 0;
-                            g_ucaMechineExist[3] = 0;
-                            g_ucDownWorkingID   = 3;
-                            g_ucDownBackingID   = 4;
-                            myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                            myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-
-                            //if ( g_ucaDeviceStatus[3] > 0 )
-                            if ( ( FAULT_CODE06 == g_ucaFaultCode[3] ) \
-                              || ( FAULT_CODE07 == g_ucaFaultCode[3] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
-                            {
-                                g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                                g_tCardSpitOutFrame.CARD_MECHINE = '3';
-                                g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
-                            }
-
-                            g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
-                            g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaFaultCode[3] > 0 ? '1' : '0';
-                            g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                            g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
-
-                            printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-
-                            g_ucaDeviceStatus[3] = 0;
-                        }
-                        break;
-                    default:
-                        break;
-
+                    g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+                    g_tCardSpitOutFrame.CARD_MECHINE = '3';
+                    g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
+                    printf ("%s\n", (char *)&g_tCardSpitOutFrame);
                 }
+                g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[ mtRxMessage.Data[1] - 1 ] + '0';
+                g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaFaultCode[ mtRxMessage.Data[1] - 1 ] > 0 ? '1' : '0';
+                g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
+                g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+
+                printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+
+                g_ucaDeviceStatus[ mtRxMessage.Data[1] - 1 ] = 0;
+
 
                 if(mtRxMessage.Data[7] == FAULT_CODE11)
                 {
@@ -738,69 +465,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             g_ucIsUpdateMenu    = 1;                        // 更新界面
             break;
         case CARD_MACHINE_INIT_ACK:
-            g_ucaMechineExist[mtRxMessage.Data[1] - 1] = 1;    // 如果主机开机,对设备进行设置,卡机有回复,则表明几个卡机存在,并通信正常
-
             break;
         case CYCLE_ACK:                 // 定时轮询回复
-            /*
-            switch( mtRxMessage.Data[1] )
-            {
-                case 1:
-                    if ( (g_ucUpWorkingID == 1 ) && (WORKING_STATUS != mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-
-                    }
-                    else if ( (g_ucUpWorkingID == 2 ) && (WORKING_STATUS == mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 2:
-                    if ( (g_ucUpWorkingID == 2 ) && (WORKING_STATUS != mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-
-                    }
-                    else if ( (g_ucUpWorkingID == 1 ) && (WORKING_STATUS == mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 3:
-                    if ( (g_ucDownWorkingID == 3 ) && (WORKING_STATUS != mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-
-                    }
-                    else if ( (g_ucDownWorkingID == 4 ) && (WORKING_STATUS == mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                case 4:
-                    if ( (g_ucDownWorkingID == 4 ) && (WORKING_STATUS != mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL );
-
-                    }
-                    else if ( (g_ucDownWorkingID == 3 ) && (WORKING_STATUS == mtRxMessage.Data[2]))
-                    {
-                        myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, NO_FAIL );
-                        myCANTransmit ( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, NO_FAIL ); // 设置工作态
-                    }
-                    break;
-                default:
-                    break;
-            }
-            */
             if ( mtRxMessage.Data[4] == HAS_CARD )
             {
                 g_ucaCardIsReady[mtRxMessage.Data[1] - 1] = 1;
@@ -908,7 +574,7 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                         myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
                         //g_ucaDeviceStatus[g_ucUpWorkingID - 1] = 0;
                         g_ucaCardIsReady[ g_ucUpWorkingID - 1] = 0;
-
+                        #if 0
                         if ( g_ucUpWorkingID == 1)
                         {
                             g_ucaHasBadCard[0] = 1;
@@ -986,12 +652,13 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                 }
                             }
                         }
+                        #endif
                         break;
                     case '6':
                         //g_siStatusOverTimeL = 100;
                         myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_BAD, 0, 0, NO_FAIL );
                         g_ucaCardIsReady[ g_ucDownWorkingID - 1] = 0;
-
+                        #if 0
                         if ( g_ucDownWorkingID == 3)
                         {
                             g_ucaHasBadCard[2] = 1;
@@ -1055,6 +722,7 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                 }
                             }
                         }
+                        #endif
                         break;
                     default:
                         g_ucaHasBadCard[0] = 1;
