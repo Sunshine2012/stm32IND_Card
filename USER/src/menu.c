@@ -6,8 +6,8 @@ Dlg g_dlg[] =           {
                         {DLG_CLEAR_LCD,      "                ", "                ", "                ", "                ", 5},
 
                         {DLG_LOGO,           "  发卡机系统    ", "    初始化...   ", "      稍候      ", "   版本: V1.0   ", 5},
-                        {DLG_STATUS,         "1.工作:         ", "2.备用:         ", "3.工作:         ", "4.备用:         ", 5},
-                        {DLG_MAIN,           "1.上、下班操作  ", "2.联机设置      ", "3.卡机设置      ", "4.调机运行      ", 0},
+                        {DLG_STATUS,         "1.号机:         ", "2.号机:         ", "3.号机:         ", "4.号机:         ", 5},
+                        {DLG_MAIN,           "1.上、下班操作  ", "2.联机设置      ", "3.调机运行      ", "                ", 0},
                         {DLG_CARD_COUNT_SET, "1 号机卡数      ", "2 号机卡数      ", "3 号机卡数      ", "4 号机卡数      ", 5},
                         {DLG_CONNETCT_SET,   "  联机模式设置  ", "1.在线发卡      ", "2.离线发卡      ", "                ", 1},
                         {DLG_CARD_ID,        "   设置卡机ID   ", "搜索卡机        ", "卡机号:         ", "通信ID号:       ", 5},
@@ -18,9 +18,10 @@ Dlg g_dlg[] =           {
                         {DLG_STATUS_ONE,     " 1号出卡        ", " 2号出卡        ", " 3号出卡        ", " 4号出卡        ", 5},
                         {DLG_STATUS_TWO,     " 1号出坏卡      ", " 2号出坏卡      ", " 3号出坏卡      ", " 4号出坏卡      ", 5},
 
-                        {DLG_DEBUG_MAIN,     "    号卡机调试  ", "1:联动运行      ", "2:单动运行      ", "                ", 0},
-                        {DLG_DEBUG_ONE,      "↑: 翻一张好卡   ", "↓: 翻一张坏卡   ", "←: 勾一张卡     ", "→: 循环出卡     ", 5},
-                        {DLG_DEBUG_TWO,      "↑: 单动正翻卡   ", "↓: 单动反翻卡   ", "←: 单动正勾卡   ", "→: 单动反勾卡   ", 5},
+                        {DLG_DEBUG_MAIN,     "    号卡机调试  ", "1:勾卡电机      ", "2:送卡电机      ", "3:测距电机      ", 0},
+                        {DLG_DEBUG_ONE,      "↑: 前进、停止   ", "↓: 后退、停止   ", "←: 电机回零位   ", "→: 勾一张卡     ", 5},
+                        {DLG_DEBUG_TWO,      "↑: 前进、停止   ", "↓: 后退、停止   ", "                ", "                ", 5},
+                        {DLG_DEBUG_THREE,    "↑: 前进、停止   ", "↓: 后退、停止   ", "←: 电机回零位   ", "                ", 5},
 
                         {DLG_FAULT_CODE,     "    号卡机故障  ", "故障码:         ", "说明:           ", "                ", 5},
 
@@ -28,17 +29,17 @@ Dlg g_dlg[] =           {
 Dlg g_dlg_fault_code[] = {
                         {DLG_CLEAR_LCD,      "                ", "                ", "                ", "                ", 5},
 
-                        {FAULT_CODE01,       "    号卡机故障  ", "故障码:(01H)    ", "说明: 初始化勾卡", "电机不能回位    ", 5},
-                        {FAULT_CODE02,       "    号卡机故障  ", "故障码:(02H)    ", "说明: 初始化翻卡", "电机反转不能回位", 5},
-                        {FAULT_CODE03,       "    号卡机故障  ", "故障码:(03H)    ", "说明: 初始化翻卡", "电机正转不能回位", 5},
-                        {FAULT_CODE04,       "    号卡机故障  ", "故障码:(04H)    ", "说明: 工作时勾卡", "电机向前堵转    ", 5},
-                        {FAULT_CODE05,       "    号卡机故障  ", "故障码:(05H)    ", "说明: 工作时勾卡", "电机向后堵转    ", 5},
-                        {FAULT_CODE06,       "    号卡机故障  ", "故障码:(06H)    ", "说明: 工作时翻卡", "电机前翻堵转    ", 5},
-                        {FAULT_CODE07,       "    号卡机故障  ", "故障码:(07H)    ", "说明: 工作时翻卡", "电机前翻回程堵转", 5},
-                        {FAULT_CODE08,       "    号卡机故障  ", "故障码:(08H)    ", "说明: 工作时翻卡", "电机反翻堵转    ", 5},
-                        {FAULT_CODE09,       "    号卡机故障  ", "故障码:(09H)    ", "说明: 工作时翻卡", "电机反翻回程堵转", 5},
-                        {FAULT_CODE0A,       "    号卡机故障  ", "故障码:(0AH)    ", "说明: 工作时勾卡", "电机不转        ", 5},
-                        {FAULT_CODE0B,       "    号卡机故障  ", "故障码:(0BH)    ", "说明: 工作时翻卡", "电机不转        ", 5},
+                        {FAULT_CODE01,       "    号卡机故障  ", "故障码:(01H)    ", "说明: 卡机中无卡", "请装载IC卡      ", 5},
+                        {FAULT_CODE02,       "    号卡机故障  ", "故障码:(02H)    ", "说明: 卡机中无卡", "请装载IC卡      ", 5},
+                        {FAULT_CODE03,       "    号卡机故障  ", "故障码:(03H)    ", "说明: 卡机中无卡", "请装载IC卡      ", 5},
+                        {FAULT_CODE04,       "    号卡机故障  ", "故障码:(04H)    ", "说明: 卡机中无卡", "请装载IC卡      ", 5},
+                        {FAULT_CODE05,       "    号卡机故障  ", "故障码:(05H)    ", "说明: 工作时勾卡", "电机堵转        ", 5},
+                        {FAULT_CODE06,       "    号卡机故障  ", "故障码:(06H)    ", "说明: 工作时勾卡", "电机堵转        ", 5},
+                        {FAULT_CODE07,       "    号卡机故障  ", "故障码:(07H)    ", "说明: 工作时勾卡", "电机堵转        ", 5},
+                        {FAULT_CODE08,       "    号卡机故障  ", "故障码:(08H)    ", "说明: 工作时勾卡", "电机堵转        ", 5},
+                        {FAULT_CODE09,       "    号卡机故障  ", "故障码:(09H)    ", "                ", "                ", 5},
+                        {FAULT_CODE0A,       "    号卡机故障  ", "故障码:(0AH)    ", "                ", "                ", 5},
+                        {FAULT_CODE0B,       "    号卡机故障  ", "故障码:(0BH)    ", "                ", "                ", 5},
                         {FAULT_CODE0C,       "    号卡机故障  ", "故障码:(0CH)    ", "说明: 通讯故障  ", "                ", 5},
                         {FAULT_CODE0D,       "    号卡机故障  ", "故障码:(未知)   ", "                ", "                ", 5},
                         {FAULT_CODE0E,       "    号卡机故障  ", "故障码:(未知)   ", "                ", "                ", 5},
@@ -73,7 +74,7 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
     u8 key = KEY_NUL;
 
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
-
+#if 0
     if(g_ucUpWorkingID == 1 && g_ucUpBackingID == 2)
     {
         for (i = 0; i < 4; i++)
@@ -109,6 +110,7 @@ void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_dlg[dlgId].MsgRow[3][i + 2] = master1[i];
         }
     }
+#endif
     if (g_ucConnectMode == 2)
     {
         g_dlg[dlgId].MsgRow[0][15] = 'X';
@@ -184,10 +186,9 @@ void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
                     doShowConnectModeSet (DLG_CONNETCT_SET, 5, NULL);
                     break;
                 case 2:
-                    doShowWorkingSet (DLG_WORKING_SET, 1, NULL);
-                    break;
+                    doShowDebugMain (DLG_DEBUG_MAIN, 0, NULL);break;
                 case 3:
-                    doShowDebugMain (DLG_DEBUG_MAIN, 0, NULL);
+                    //doShowWorkingSet (DLG_WORKING_SET, 1, NULL);
                     break;
                 default:
                     break;
@@ -201,7 +202,7 @@ void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_DOWN:
-            if (3 > g_dlg[dlgId].highLightRow)
+            if (2 > g_dlg[dlgId].highLightRow)
             {
                 g_dlg[dlgId].highLightRow++;
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
@@ -275,18 +276,18 @@ void doShowEmployeeMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
                 switch (g_dlg[dlgId].highLightRow)
                 {
                     case 1:
-                        myCANTransmit( gt_TxMessage, 1, 1, SPIT_ONE_BAD_CARD, 1, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 2, 2, SPIT_ONE_BAD_CARD, 2, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 3, 3, SPIT_ONE_BAD_CARD, 3, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 4, 4, SPIT_ONE_BAD_CARD, 4, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 1, 1, SPIT_ONE_BAD_CARD, 1, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 2, 2, SPIT_ONE_BAD_CARD, 2, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 3, 3, SPIT_ONE_BAD_CARD, 3, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 4, 4, SPIT_ONE_BAD_CARD, 4, 0, 0, NO_FAIL );
                         g_ucCurDlg = DLG_MAIN;
                         g_ucIsUpdateMenu = 1;
                         break;
                     case 2:
-                        myCANTransmit( gt_TxMessage, 1, 1, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 2, 2, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 3, 3, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-                        myCANTransmit( gt_TxMessage, 4, 4, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 1, 1, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 2, 2, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 3, 3, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
+                        //myCANTransmit( gt_TxMessage, 4, 4, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
                         g_ucCurDlg = DLG_MAIN;
                         g_ucIsUpdateMenu = 1;
                         break;
@@ -889,10 +890,13 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
                 case 0:
                     break;
                 case 1:
-                    doShowDebugOne (DLG_DEBUG_ONE, 5, NULL);
+                    doShowDebugOne (DLG_DEBUG_ONE, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
                     break;
                 case 2:
-                    doShowDebugTwo (DLG_DEBUG_TWO, 5, NULL);
+                    doShowDebugTwo (DLG_DEBUG_TWO, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
+                    break;
+                case 3:
+                    doShowDebugThree (DLG_DEBUG_THREE, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
                     break;
                 default:
                     break;
@@ -906,7 +910,7 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
             }
             break;
         case KEY_DOWN:
-            if (2 > g_dlg[dlgId].highLightRow)
+            if (3 > g_dlg[dlgId].highLightRow)
             {
                 g_dlg[dlgId].highLightRow++;
                 isTurnShow(0,g_dlg[dlgId].highLightRow);
@@ -955,17 +959,18 @@ void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm)
     }
 }
 
-// 调试菜单(联动),如果有一行需要反显示,则设置当前行反显示,传递参数地址
+// 调试菜单,如果有一行需要反显示,则设置当前行反显示,传递参数地址
 void doShowDebugOne (u8 dlg_id, u8 isNotRow, void * p_parm)
 {
     u8 i = 0;
     u8 dlgId = check_menu(dlg_id);
     u8 key = KEY_NUL;
-    u8 str_num[5] = {0};
-    u8 str_id[5] = {0};
+    u8 str_num[10] = {0};
+    u8 str_id[10] = {0};
     u16 id = 0x7810 | g_ucCurID;       // CAN通信的ID
     u8 id_h = ( id >> 8 ) & 0xff;                // CAN通信的ID高字节
     u8 id_l = id & 0xff;                         // CAN通信的ID低字节
+    Dlg *parm = (Dlg *)p_parm;
 
     g_ucCurDlg = dlg_id;    // 记录当前显示的ID
 
@@ -985,32 +990,34 @@ void doShowDebugOne (u8 dlg_id, u8 isNotRow, void * p_parm)
     switch (key)
     {
         case KEY_UP:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, SPIT_ONE_OK_CARD, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_FORWARD, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 0;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_DOWN:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, SPIT_ONE_BAD_CARD, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_REVERSAL, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 1;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_LEFT:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, HOOK_ONE_CARD, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_RESET, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 2;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_RIGHT:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, CYCLE_SPIT_ONE_CARD, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, HOOK_CARD, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 3;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_QUIT:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
             break;
         case KEY_CANCEL:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_DEBUG_MAIN;
             g_dlg[g_ucCurDlg].highLightRow = 0;
@@ -1032,7 +1039,7 @@ void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
     u16 id = 0x7810 | g_ucCurID;                          // CAN通信的ID
     u8 id_h = ( id >> 8 ) & 0xff;                   // CAN通信的ID高字节
     u8 id_l = id & 0xff;                            // CAN通信的ID低字节
-    g_ucKeyContinue = 1;                            // 进入单动模式
+    Dlg *parm = (Dlg *)p_parm;
 
     g_ucCurDlg = dlg_id;                            // 记录当前显示的ID
 
@@ -1051,15 +1058,16 @@ void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
     switch (key)
     {
         case KEY_UP:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, SPIT_MOTOR_POSITIVE_STEP, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_FORWARD, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 0;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
         case KEY_DOWN:
-            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, SPIT_MOTOR_NEGATIVE_STEP, g_ucCurID, id_h, id_l, NO_FAIL);
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_REVERSAL, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 1;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
+        /*
         case KEY_LEFT:
             myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, HOOK_MOTOR_POSITIVE_STEP, g_ucCurID, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 2;
@@ -1070,24 +1078,96 @@ void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm)
             g_dlg[dlgId].highLightRow = 3;
             isTurnShow(0,g_dlg[dlgId].highLightRow);
             break;
+        */
         case KEY_QUIT:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_ucIsSetting = 0;
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_STATUS;
             g_ucIsUpdateMenu = 1;
-            g_ucKeyContinue = 0;             // 退出单动模式
             break;
         case KEY_CANCEL:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
             g_dlg[dlgId].highLightRow = 0;
             g_ucCurDlg = DLG_DEBUG_MAIN;
             g_dlg[g_ucCurDlg].highLightRow = 0;
             g_ucIsUpdateMenu = 1;
-            g_ucKeyContinue = 0;             // 退出单动模式
             break;
         default:
             break;
     }
 
+}
+
+// 调试菜单,如果有一行需要反显示,则设置当前行反显示,传递参数地址
+void doShowDebugThree (u8 dlg_id, u8 isNotRow, void * p_parm)
+{
+    u8 i = 0;
+    u8 dlgId = check_menu(dlg_id);
+    u8 key = KEY_NUL;
+    u8 str_num[10] = {0};
+    u8 str_id[10] = {0};
+    u16 id = 0x7810 | g_ucCurID;       // CAN通信的ID
+    u8 id_h = ( id >> 8 ) & 0xff;                // CAN通信的ID高字节
+    u8 id_l = id & 0xff;                         // CAN通信的ID低字节
+    Dlg *parm = (Dlg *)p_parm;
+
+    g_ucCurDlg = dlg_id;    // 记录当前显示的ID
+
+    for (i = 0; i < 4; i++)
+    {
+        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == isNotRow ? 1 : 0);
+    }
+    isTurnShow(0,isNotRow);
+
+    for (i = 0; i < 4; i++)
+    {
+        g_ucaDeviceStatus[i] = 0;
+    }
+
+    key = g_ucKeyValues;
+    g_ucKeyValues = KEY_NUL;
+    switch (key)
+    {
+        case KEY_UP:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_FORWARD, parm->highLightRow, id_h, id_l, NO_FAIL);
+            g_dlg[dlgId].highLightRow = 0;
+            isTurnShow(0,g_dlg[dlgId].highLightRow);
+            break;
+        case KEY_DOWN:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_REVERSAL, parm->highLightRow, id_h, id_l, NO_FAIL);
+            g_dlg[dlgId].highLightRow = 1;
+            isTurnShow(0,g_dlg[dlgId].highLightRow);
+            break;
+        case KEY_LEFT:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, MOTOR_RESET, parm->highLightRow, id_h, id_l, NO_FAIL);
+            g_dlg[dlgId].highLightRow = 2;
+            isTurnShow(0,g_dlg[dlgId].highLightRow);
+            break;
+        /*
+        case KEY_RIGHT:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, CYCLE_SPIT_ONE_CARD, g_ucCurID, id_h, id_l, NO_FAIL);
+            g_dlg[dlgId].highLightRow = 3;
+            isTurnShow(0,g_dlg[dlgId].highLightRow);
+            break;
+        */
+        case KEY_QUIT:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
+            g_ucIsSetting = 0;
+            g_dlg[dlgId].highLightRow = 0;
+            g_ucCurDlg = DLG_STATUS;
+            g_ucIsUpdateMenu = 1;
+            break;
+        case KEY_CANCEL:
+            myCANTransmit(gt_TxMessage, g_ucCurID, g_ucCurID, STOP_DEBUG, parm->highLightRow, id_h, id_l, NO_FAIL);
+            g_dlg[dlgId].highLightRow = 0;
+            g_ucCurDlg = DLG_DEBUG_MAIN;
+            g_dlg[g_ucCurDlg].highLightRow = 0;
+            g_ucIsUpdateMenu = 1;
+            break;
+        default:
+            break;
+    }
 }
 
 // 显示故障码,如果有一行需要反显示,则设置当前行反显示,传递参数地址

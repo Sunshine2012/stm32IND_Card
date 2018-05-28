@@ -201,10 +201,10 @@ typedef enum CMD
 
     // 40H--5FH：卡机调机命令信息
     STOP_DEBUG              = 0x40,                 /* 停止调试 */
-    CYCLE_SPIT_ONE_CARD     = 0x41,                 /* 循环出一张卡 */
-    SPIT_ONE_OK_CARD        = 0x42,                 /* 翻一张好卡 */
-    SPIT_ONE_BAD_CARD       = 0x43,                 /* 翻一张坏卡 */
-    HOOK_ONE_CARD           = 0x44,                 /* 勾一张卡 */
+    MOTOR_FORWARD           = 0x41,                 /* 电机正转 */
+    MOTOR_REVERSAL          = 0x42,                 /* 电机反转 */
+    MOTOR_RESET             = 0x43,                 /* 电机回零 */
+    HOOK_CARD               = 0x44,                 /* 勾一张卡 */
 
     //
     SPIT_MOTOR_POSITIVE_STEP= 0x45,                 /* 翻卡电机正单步 */

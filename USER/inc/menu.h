@@ -35,28 +35,28 @@ typedef enum DLG_ID
 // 界面结构体
 typedef struct Dlg
 {
-   unsigned char ID;
+   u8 ID;
    char MsgRow[4][36];
-   unsigned char highLightRow;
-   unsigned char prevDlgID;            // 上一个菜单ID
-   unsigned char nextDlgID;            // 下一个菜单ID
+   u8 highLightRow;
+   u8 prevDlgID;            // 上一个菜单ID
+   u8 nextDlgID;            // 下一个菜单ID
 }Dlg;
 
 
-void doShowStatusMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowMainMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowEmployeeMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowCardCountSet (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowConnectModeSet (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowStatusOne (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowStatusTwo (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowIdSetMenu (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowWorkingSet (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowDebugMain (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowDebugOne (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowDebugTwo (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-void doShowFaultCode (unsigned char dlg_id, unsigned char isNotRow, void * p_parm);
-
-unsigned char check_menu(unsigned char ch);
+void doShowStatusMenu (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowMainMenu (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowEmployeeMenu (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowCardCountSet (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowConnectModeSet (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowStatusOne (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowStatusTwo (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowIdSetMenu (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowWorkingSet (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowDebugMain (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowDebugOne (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowDebugTwo (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowDebugThree (u8 dlg_id, u8 isNotRow, void * p_parm);
+void doShowFaultCode (u8 dlg_id, u8 isNotRow, void * p_parm);
+u8 check_menu(u8 ch);
 
 #endif

@@ -66,7 +66,7 @@ void bspInit( void )
     generalTIM3Init();          // 定时器初始化,30s定时无按键按下,退回到主界面
     //I2C_Configuration();
 
-    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
+    //IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 }
 void lcdRef()
 {
@@ -96,43 +96,47 @@ void lcdRef()
         {
 
             case DLG_STATUS:
-                doShowStatusMenu( DLG_STATUS, 5, NULL ); // 显示主界面菜单,当前状态
+                doShowStatusMenu ( DLG_STATUS, 5, NULL ); // 显示主界面菜单,当前状态
                 break;
 
             case DLG_EMPLOYEE_MENU:
-                doShowEmployeeMenu( DLG_EMPLOYEE_MENU, 5, NULL ); // 显示主界面菜单,当前状态
+                doShowEmployeeMenu ( DLG_EMPLOYEE_MENU, 5, NULL ); // 显示主界面菜单,当前状态
                 break;
 
             case DLG_MAIN:
-                doShowMainMenu( DLG_MAIN, 0, NULL );    // 进入设置状态
+                doShowMainMenu ( DLG_MAIN, 0, NULL );    // 进入设置状态
                 break;
 
             case DLG_WORKING_SET:
-                doShowWorkingSet( DLG_WORKING_SET, 1, NULL );
+                doShowWorkingSet ( DLG_WORKING_SET, 1, NULL );
                 break;
 
             case DLG_STATUS_ONE:
-                doShowStatusOne( DLG_STATUS_ONE, 5, NULL );
+                doShowStatusOne ( DLG_STATUS_ONE, 5, NULL );
                 break;
 
             case DLG_STATUS_TWO:
-                doShowStatusTwo( DLG_STATUS_TWO, 5, NULL );
+                doShowStatusTwo ( DLG_STATUS_TWO, 5, NULL );
                 break;
 
             case DLG_CARD_COUNT_SET:
-                doShowCardCountSet( DLG_CARD_COUNT_SET, 0, NULL );
+                doShowCardCountSet ( DLG_CARD_COUNT_SET, 0, NULL );
                 break;
 
             case DLG_DEBUG_MAIN:
-                doShowDebugMain( DLG_DEBUG_MAIN, 0, NULL );
+                doShowDebugMain ( DLG_DEBUG_MAIN, 0, NULL );
                 break;
 
             case DLG_DEBUG_ONE:
-                doShowDebugOne( DLG_DEBUG_ONE, 5, NULL );
+                doShowDebugOne ( DLG_DEBUG_ONE, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
                 break;
 
             case DLG_DEBUG_TWO:
-                doShowDebugTwo( DLG_DEBUG_TWO, 5, NULL );
+                doShowDebugTwo ( DLG_DEBUG_TWO, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
+                break;
+
+            case DLG_DEBUG_THREE:
+                doShowDebugThree ( DLG_DEBUG_THREE, 5, &(g_dlg[check_menu(DLG_DEBUG_MAIN)]) );
                 break;
 
             case DLG_CONNETCT_SET:
@@ -163,17 +167,14 @@ int main( void )
     //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
     //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
 
-
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    delayMs (1000);
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    delayMs (1000);
     myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    delayMs (1000);
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, SET_MECHINE_STATUS, WORKING_STATUS, 0, 0, 0 ); // 设置工作态
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, SET_MECHINE_STATUS, BACKING_STATUS, 0, 0, 0 ); // 设置备用态
-
+    delayMs (1000);
     printf ("the code version %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
     printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
@@ -189,16 +190,18 @@ int main( void )
 
     g_siKeyTime = 100;
 
-    g_siaCheck[0] = 1200;
-    g_siaCheck[1] = 1200;
-    g_siaCheck[2] = 1200;
-    g_siaCheck[3] = 1200;
+    //g_siaCheck[0] = 1200;
+    //g_siaCheck[1] = 1200;
+    //g_siaCheck[2] = 1200;
+    //g_siaCheck[3] = 1200;
 
-    g_siCycleAskMsgTime = 2;      // 4秒查询一次卡机状态
+    //g_siCycleAskMsgTime = 2;      // 4秒查询一次卡机状态
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
+
+    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 
     while ( 1 )
     {

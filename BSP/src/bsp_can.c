@@ -159,7 +159,7 @@ u8 myCANTransmit (CanTxMsg mMsg, u8 mechine_id, u8 boxNum, u8 cmd, u8 status,
     }
     TransmitMailbox = CAN_Transmit(CAN1,&mMsg);
     g_uiSerNum++;           // 帧序号每次加1
-    g_siCycleAskMsgTime = 2; // 在空挡期,4秒钟之后查询主备机
+    //g_siCycleAskMsgTime = 2; // 在空挡期,4秒钟之后查询主备机
     return 0;
 }
 

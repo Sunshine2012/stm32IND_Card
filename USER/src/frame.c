@@ -101,14 +101,14 @@ const Print_msg g_taShowStatus_msg[] = {
                             {CARD_IS_BAD,                   "坏卡"},
                             {IS_WORKING,                    "工作"},
                             {IS_BACKING,                    "备用"},
-                            {0xfe,                          "    "},
+                            {CONNECTED,                     "    "},
                             {0xff,NULL}
                         };
 const Print_msg g_taShowFaultCode_msg[] = {
                             {0,                             "NULL"},
                             {CARD_IS_OK,                    "好卡"},
                             {CARD_IS_BAD,                   "坏卡"},
-                            {0xfe,                          "    "},
+                            {CONNECTED,                     "    "},
                             {0xff,NULL}
                         };
 // 天线的切换,4个天线,对应着不同的逻辑,需要同时使能不同的继电器
