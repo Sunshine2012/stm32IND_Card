@@ -5,8 +5,6 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 
-
-
 #if 1
 
 /**************************USART参数定义********************************/
@@ -43,10 +41,30 @@
 */
 #endif
 
+// 串口发送对应的DMA请求通道
+#define  USART1_TX_DMA_CHANNEL     DMA1_Channel4
+
+// 串口接收对应的DMA请求通道
+#define  USART1_RX_DMA_CHANNEL     DMA1_Channel5
+
+// 外设寄存器地址
+#define  USART1_DR_ADDRESS         (USART1_BASE+0x04)
+
+// 一次发送的数据量
+#define  SENDBUFF_SIZE            80
+
+extern u8 g_ucaTxBuff[SENDBUFF_SIZE];
+extern u8 g_ucaRxBuff[SENDBUFF_SIZE]; // 使用全局的数据缓存
+extern u8 g_num;
+
 void USART1_Config(void);
 void USART1_SendByte( USART_TypeDef * pUSARTx, uint8_t ch);
 void USART1_nSendString( USART_TypeDef * pUSARTx, char *str,int n);
 void USART1_SendString( USART_TypeDef * pUSARTx, char *str);
 void USART1_SendHalfWord( USART_TypeDef * pUSARTx, uint16_t ch);
+void USART1_DMA_Config(void);
+void USART1_RX_DMA_Config(void);
+void USART1_TX_DMA_Config(void);
+void USART1_SendStringFromDMA( u8 *str, u32 len );
 
 #endif /* __USART_H */

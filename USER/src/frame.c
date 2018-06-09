@@ -10,7 +10,7 @@ u32 g_uiaSpitCardCount[5]    = {0, 0, 0, 0, 0};    // ³ö¿¨ÊýÁ¿,[0]Îª³ö¿¨×ÜÊýÁ¿,·
 u8 g_ucSerNum = '0';  // Ö¡ÐòºÅ   È«¾Ö
 
 RSCTL_FREME g_tP_RsctlFrame = {'<','0','0','>'};        // ÕýÓ¦´ðÖ¡
-RSCTL_FREME g_tN_RsctlFrame = {'<','1','0','>'};        // ¸ºÓ¦´ðÖ¡
+RSCTL_FREME g_tN_RsctlFrame = {'<','0','1','>'};        // ¸ºÓ¦´ðÖ¡
 
 /* ¿¨»úÉÏµçÐÅÏ¢(41H)Ö¡          4×Ö½Ú */
 CARD_MACHINE_POWER_ON_FREME      g_tCardMechinePowerOnFrame = {'<', '0', CARD_MACHINE_POWER_ON, '>'};
@@ -26,8 +26,8 @@ CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame =    {'<', '0', 'B', 
 /* ÒÑ³ö¿¨ÐÅÏ¢(43H)Ö¡            6×Ö½Ú */
 CARD_MECHINE_TO_PC_FRAME        g_tCardSpitOutFrame = {'<', '0', CARD_SPIT_OUT, '1', '1', '>'};
 
-/* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          6×Ö½Ú */
-CARD_MECHINE_TO_PC_FRAME        g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1' ,'>'};
+/* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          7×Ö½Ú */
+CARD_MECHINE_KEYPRESS_FRAME     g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1' ,'1','>'};
 
 /* ¿¨±»È¡×ßÐÅÏ¢(45H)Ö¡          6×Ö½Ú */
 CARD_MECHINE_TO_PC_FRAME        g_tCardTakeAwayFrame = {'<', '0', CARD_TAKE_AWAY, '1', '1', '>'};
@@ -37,9 +37,6 @@ CARD_REPORT_SPIT_STATUES_FRAME   g_tCardReportSpitStatusFrame = {'<', '0', CARD_
                                                                                                      '0', '0', '0', '0', '0', '0', '0', '0',
                                                                                                      '0', '0', '0', '0', '0', '0', '0', '0',
                                                                                                      '0', '0', '0', '0', '0', '0', '0', '0', '>'};
-
-
-
 /* ³õÊ¼»¯¿¨»úÐÅÏ¢(61H)Ö¡        20×Ö½Ú */
 PC_TO_CARD_INIT_FREME           g_tPcToCardInitFrame = {'<', '0', PC_INIT_MECHINE, '9', '9', '9', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0','>'};
 
@@ -284,7 +281,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                         g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                         g_tCardKeyPressFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';        // ½«Êý¾Ý×ª»»Îª×Ö·û,È»ºó½«Êý¾Ý·¢ËÍ³öÈ¥
                         g_tCardKeyPressFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';   //
-                        printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                        //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                        USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame)); // °´¼üÏûÏ¢
                         g_siStatusOverTimeL = 1000;         // Ò»¶¨Ê±¼äÈç¹û»¹Ã»ÓÐ·¢¿¨Íê³É,¹ÊÕÏ´¦Àí
                         //g_siStatusOverTimeS = 500;          //»¹Ã»ÓÐÍê³É·¢¿¨,ÔòÉÏ±¨°´¼ü
 
@@ -311,7 +309,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                     {
                         antSwitch(mtRxMessage.Data[1]); // Íù¹¤¿Ø»ú·¢ËÍÊý¾ÝµÄÍ¬Ê±,ÇÐ»»ÌìÏß
                         myCANTransmit ( gt_TxMessage, mtRxMessage.Data[1], 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
-                        g_siStatusOverTimeL = 300;
+                        g_siStatusOverTimeL = 2000;
 
                         g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 3; // °´¼ü·¢¿¨Á÷³Ì¿ªÊ¼Ö®ºó£¬ÔÙ´Î°´¼ü²»ÔÙÏìÓ¦
 
@@ -345,7 +343,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardSpitOutFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';
                 g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+                //printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+                USART1_SendStringFromDMA ((char *)&g_tCardSpitOutFrame , strlen ((char *)&g_tCardSpitOutFrame));
 
                 TIM_SetCounter(GENERAL_TIM2, 0);      // ¶¨Ê±Æ÷ÇåÁã,2sÖ®ºóÔÙ´ÎÉÏ±¨ÏûÏ¢
 
@@ -365,7 +364,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                 g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                 g_siStatusOverTimeL = 1000;
                 g_siStatusOverTimeS = 0;
@@ -375,6 +375,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             }
             else if ( ( mtRxMessage.Data[4] == CARD_IS_BAD ) && ( g_ucConnectMode == 1 ) )
             {
+                g_siStatusOverTimeS = 0;
                 g_ucaDeviceStatus[0] = 0;
                 g_ucaDeviceStatus[1] = 0;
                 g_ucaDeviceStatus[2] = 0;
@@ -391,13 +392,14 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             {
                 g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] / 2 + '1';
-                printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+                g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
+                //printf ( "%s\n", ( char * ) &g_tCardTakeAwayFrame );
+                USART1_SendStringFromDMA ((char *)&g_tCardTakeAwayFrame , strlen ((char *)&g_tCardTakeAwayFrame));
 
-                g_uiCurNum = g_tCardTakeAwayFrame.RSCTL;
-                g_siCardTakeMsgTime = 3;
-                g_siStatusOverTimeS = 100;
-                g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 6;  // ±íÃ÷¿¨ÒÑ¾­±»È¡×ß,ÖÃÎ»×´Ì¬
+                //g_uiCurNum = g_tCardTakeAwayFrame.RSCTL;
+                //g_siCardTakeMsgTime = 3;
+                //g_siStatusOverTimeS = 100;
+                g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;  // ±íÃ÷¿¨ÒÑ¾­±»È¡×ß,ÖÃÎ»×´Ì¬
 
             }
             else
@@ -426,14 +428,14 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 TIM_SetCounter(GENERAL_TIM2, 0);      // ¶¨Ê±Æ÷ÇåÁã,2sÖ®ºóÔÙ´ÎÉÏ±¨ÏûÏ¢
                 g_tCardMechineStatusFrame.CARD_MECHINE1.status = '1';
 
-                //if ( g_ucaDeviceStatus[0] > 0 )
                 if ( ( FAULT_CODE06 == g_ucaFaultCode[0] ) \
                 || ( FAULT_CODE07 == g_ucaFaultCode[0] ) )    // ·­¿¨µç»úÕý×ª»òÕß·´×ªÊ§°Üµ¼ÖÂµÄ·¢¿¨Ê§°Ü
                 {
                     g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                     g_tCardSpitOutFrame.CARD_MECHINE = '3';
                     g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                    printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+                    //printf ("%s\n", (char *)&g_tCardSpitOutFrame);
+                    USART1_SendStringFromDMA ((char *)&g_tCardSpitOutFrame , strlen ((char *)&g_tCardSpitOutFrame));
                 }
                 g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[ mtRxMessage.Data[1] - 1 ] + '0';
@@ -441,7 +443,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                 g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                 g_ucaDeviceStatus[ mtRxMessage.Data[1] - 1 ] = 0;
 
@@ -465,6 +468,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             g_ucIsUpdateMenu    = 1;                        // ¸üÐÂ½çÃæ
             break;
         case CARD_MACHINE_INIT_ACK:
+            g_ucaMechineExist[mtRxMessage.Data[1] - 1] = 1;    // Èç¹ûÖ÷»ú¿ª»ú,¶ÔÉè±¸½øÐÐÉèÖÃ,¿¨»úÓÐ»Ø¸´,Ôò±íÃ÷¼¸¸ö¿¨»ú´æÔÚ,²¢Í¨ÐÅÕý³£
+
             break;
         case CYCLE_ACK:                 // ¶¨Ê±ÂÖÑ¯»Ø¸´
             if ( mtRxMessage.Data[4] == HAS_CARD )
@@ -503,12 +508,13 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
             case PC_SPIT_OUT_CARD:              /* ³ö¿¨ÐÅÏ¢(62H)Ö¡ */
                 antSwitch( 0 );
                 g_ucBadCardCount = 0;
+
                 switch (argv[3])
                 {
                     case '5':
                         myCANTransmit ( gt_TxMessage, g_ucUpWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_siStatusOverTimeL = 2500;      // Èç¹û25s»¹Ã»ÓÐÍê³É·­¿¨£¬ÔòÈÏÎª¿¨»úÓÐ¹ÊÕÏÁË,ÇÒ¿¨»ú20sÖ®ºó²Å·¢ËÍ¹ÊÕÏ±¨¾¯
-                        g_siStatusOverTimeS = 150;
+                        g_siStatusOverTimeS = 300;
                         g_siOutCardMsgTime = 3;              // ÖØ·¢3´Î
 
                         g_ucaDeviceStatus[g_ucUpWorkingID - 1] = 3; // °´¼ü·¢¿¨Á÷³Ì×´Ì¬
@@ -523,7 +529,7 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                     case '6':
                         myCANTransmit ( gt_TxMessage, g_ucDownWorkingID, 0, WRITE_CARD_STATUS, CARD_IS_OK, 0, 0, NO_FAIL );
                         g_siStatusOverTimeL = 2500;      // Èç¹û25s»¹Ã»ÓÐÍê³É·­¿¨£¬ÔòÈÏÎª¿¨»úÓÐ¹ÊÕÏÁË,ÇÒ¿¨»ú20sÖ®ºó²Å·¢ËÍ¹ÊÕÏ±¨¾¯
-                        g_siStatusOverTimeS = 150;
+                        g_siStatusOverTimeS = 300;
                         g_siOutCardMsgTime = 3;              // ÖØ·¢3´Î
 
                         g_ucaDeviceStatus[g_ucDownWorkingID - 1] = 3; // °´¼ü·¢¿¨Á÷³Ì×´Ì¬
@@ -549,6 +555,8 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                 }
                 else
                 {
+                    g_siStatusOverTimeL = 0;
+                    g_siStatusOverTimeS = 0;
                     g_ucaDeviceStatus[0] = 0;
                     g_ucaDeviceStatus[1] = 0;
                     g_ucaDeviceStatus[2] = 0;
@@ -595,27 +603,17 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                                     delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-                                    /*
-                                    if ( 1 > g_ucBadCardCount )
-                                    {
-                                        g_siStatusOverTimeL = 1000;      // Èç¹û10»¹Ã»ÓÐÍê³É·­¿¨£¬ÔòÈÏÎª¿¨»úÓÐ¹ÊÕÏÁË
-                                        g_siStatusOverTimeS = 400;
-                                    }
-                                    else
-                                    {
-                                        g_ucaDeviceStatus[0] = 0;
-                                        g_ucaDeviceStatus[1] = 0;
-                                        g_ucaDeviceStatus[2] = 0;
-                                        g_ucaDeviceStatus[3] = 0;
-                                    }*/
+                                    //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame));
+
                                 }
                             }
                         }
@@ -639,15 +637,16 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                                     delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '1';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucUpWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-
+                                    //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame));
 
                                 }
                             }
@@ -679,15 +678,16 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                                     delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
-
+                                    //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame));
                                 }
                             }
                         }
@@ -711,14 +711,16 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                                     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                                     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                                    printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
 
                                     delayMs (150);
 
                                     g_tCardKeyPressFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                                     g_tCardKeyPressFrame.CARD_MECHINE = '2';
                                     g_tCardKeyPressFrame.MECHINE_ID = g_ucDownWorkingID + '0';
-                                    printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    //printf ( "%s\n", ( char * ) &g_tCardKeyPressFrame );
+                                    USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame));
                                 }
                             }
                         }

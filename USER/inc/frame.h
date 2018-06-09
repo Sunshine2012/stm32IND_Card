@@ -85,6 +85,19 @@ typedef struct CARD_MACHINE_STATUES_FRAME
     const u8 END;
 }CARD_MACHINE_STATUES_FRAME;
 
+// 6×Ö½Ú
+typedef struct CARD_MECHINE_KEYPRESS_FRAME
+{
+    const u8 STX;           /* Ö¡¿ªÊ¼ */
+    u8 RSCTL;               /* Ö¡ÐòºÅ */
+    u8 CTL;                 /* Ö¡ÀàÐÍ */
+    u8 CARD_MECHINE;        /* ¹¤Î»ÐÅÏ¢ */
+    u8 MECHINE_ID;          /* ¿¨»ú±àºÅ */
+    u8 CAR_TYPE;            /* ³µÐÍ */
+    const u8 ETX;           /* Ö¡½áÊø */
+    const u8 END;
+}CARD_MECHINE_KEYPRESS_FRAME;
+
 
 // 6×Ö½Ú
 typedef struct CARD_MECHINE_TO_PC_FRAME
@@ -312,7 +325,7 @@ extern RSCTL_FREME                      g_tN_RsctlFrame;                    /* ¸
 extern CARD_MACHINE_POWER_ON_FREME      g_tCardMechinePowerOnFrame;         /* ¿¨»úÉÏµçÐÅÏ¢(41H)Ö¡          4×Ö½Ú */
 extern CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame;          /* ×´Ì¬ÐÅÏ¢(42H)Ö¡             30×Ö½Ú */
 extern CARD_MECHINE_TO_PC_FRAME         g_tCardSpitOutFrame;                /* ÒÑ³ö¿¨ÐÅÏ¢(43H)Ö¡            6×Ö½Ú */
-extern CARD_MECHINE_TO_PC_FRAME         g_tCardKeyPressFrame;               /* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          6×Ö½Ú */
+extern CARD_MECHINE_KEYPRESS_FRAME      g_tCardKeyPressFrame;               /* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          6×Ö½Ú */
 extern CARD_MECHINE_TO_PC_FRAME         g_tCardTakeAwayFrame;               /* ¿¨±»È¡×ßÐÅÏ¢(45H)Ö¡          6×Ö½Ú */
 extern CARD_REPORT_SPIT_STATUES_FRAME   g_tCardReportSpitStatusFrame;       /* ÉÏ±¨¿¨¼ÐºÅ±àºÅÐÅÏ¢(46H)Ö¡   36×Ö½Ú */
 

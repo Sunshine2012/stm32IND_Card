@@ -3,7 +3,7 @@
 u8 g_ucConnectMode      = 1;            // 1为联机模式,其他为单机测试模式
 u8 g_ucIsSetting        = 0;            // 如果有人在操作界面的时候,新来的报警都处于后台显示,当处理完成之后再显示
 u8 g_ucIsUpdateMenu     = 0;            // 更新显示
-u8 g_ucCurDlg           = 0;            // 当前显示的菜单ID
+u8 g_ucCurDlg           = DLG_STATUS;   // 当前显示的菜单ID
 u8 g_ucHighLightRow     = 0;            // 当前显示的菜单需要高亮的行
 u8 g_ucCurID            = 1;            // 当前通信设备的号
 u8 g_ucIsNewWarningCode = 0;            // 有新的报警,再次更新界面,在同一时候,有多个未处理的报警
@@ -22,6 +22,10 @@ u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
 u8 g_ucaMasterStandbyStatus[4]  = {0, 0, 0, 0};  // 卡机的主备机状态
 u8 g_ucaStatus[4]  = {0x0a, 0x0a, 0x0a, 0x0a};      // 卡机的工作状态
+
+u8 g_ucP_RsctlFrame = 0;                 // 收到一帧正确的数据
+u8 g_ucIsUpdateMsgFlag = 0;              // 向PC上报卡机消息标志位
+u8 g_ucIsCycleMsgFlag = 0;               // 向卡机发送定时查询消息标志位
 
 u8 g_ucKeyPressCount = 0;                // 在2秒钟连续按键6次,则重启设备
 
@@ -66,7 +70,7 @@ void bspInit( void )
     generalTIM3Init();          // 定时器初始化,30s定时无按键按下,退回到主界面
     //I2C_Configuration();
 
-    //IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
+    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 }
 void lcdRef()
 {
@@ -148,32 +152,68 @@ void lcdRef()
         }
     }
 }
+
+
+void updateMsg(void)
+{
+
+    g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[0] = g_uiaInitCardCount[1] / 100 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[1] = g_uiaInitCardCount[1] / 10 % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE1.cardNum[2] = g_uiaInitCardCount[1] % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[0] + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaHasBadCard[0] ? '2' : '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaFaultCode[0] > 0 ? '1' : '0';
+
+    g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[0] = g_uiaInitCardCount[2] / 100 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[1] = g_uiaInitCardCount[2] / 10 % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE2.cardNum[2] = g_uiaInitCardCount[2] % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE2.antHasCard = g_ucaCardIsReady[1] + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaHasBadCard[1] ? '2' : '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE2.status = g_ucaFaultCode[1] > 0 ? '1' : '0';
+
+    g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[0] = g_uiaInitCardCount[3] / 100 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[1] = g_uiaInitCardCount[3] / 10 % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE3.cardNum[2] = g_uiaInitCardCount[3] % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE3.antHasCard = g_ucaCardIsReady[2] + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaHasBadCard[2] ? '2' : '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE3.status = g_ucaFaultCode[2] > 0 ? '1' : '0';
+
+    g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[0] = g_uiaInitCardCount[4] / 100 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[1] = g_uiaInitCardCount[4] / 10 % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE4.cardNum[2] = g_uiaInitCardCount[4] % 10 + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE4.antHasCard = g_ucaCardIsReady[3] + '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaHasBadCard[3] ? '2' : '0';
+    g_tCardMechineStatusFrame.CARD_MECHINE4.status = g_ucaFaultCode[3] > 0 ? '1' : '0';
+
+    g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
+    g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
+    g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+
+    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame)); // 2秒上报一次系统消息
+
+}
+
 int main( void )
 
 {
     u8 ret = 0;
     u8 i = 0;
-    g_ucIsSetting = 0;
-    bspInit();
 
-    printf ("%s","你好,欢迎使用乐为电子板卡系统");
+    bspInit();
 
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
 
-    //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-    //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-    //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-    //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CARD_MACHINE_INIT, 0, 0, 0, NO_FAIL );
-
     myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     delayMs (1000);
     myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     delayMs (1000);
-    myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
+	myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     delayMs (1000);
     myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //printf ("%s\n","你好, 欢迎使用乐为电子板卡系统");
     delayMs (1000);
     printf ("the code version %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
@@ -205,6 +245,42 @@ int main( void )
 
     while ( 1 )
     {
+
+        if ( 1 == g_ucP_RsctlFrame )
+        {
+            g_ucP_RsctlFrame = 0;
+            USART1_SendStringFromDMA ((char *)&g_tP_RsctlFrame , strlen ((char *)&g_tP_RsctlFrame));
+        }
+
+        if ( 1 == g_ucIsUpdateMsgFlag )
+        {
+            g_ucIsUpdateMsgFlag = 0;
+            updateMsg();    // 2秒更新一次上位机数据
+        }
+#if 0
+        if ( 1 == g_ucIsCycleMsgFlag )
+        {
+            g_ucIsCycleMsgFlag = 0;
+            //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+            delayMs ( 1 );
+            //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+            delayMs ( 1 );
+            //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+            delayMs ( 1 );
+            //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+
+            g_ucaMasterStandbyStatus[0] = 0;
+            g_ucaMasterStandbyStatus[1] = 0;
+            g_ucaMasterStandbyStatus[2] = 0;
+            g_ucaMasterStandbyStatus[3] = 0;
+            g_ucaStatus[0] = 0x0a;
+            g_ucaStatus[1] = 0x0a;
+            g_ucaStatus[2] = 0x0a;
+            g_ucaStatus[3] = 0x0a;
+            g_siCheckStatus = 5;        // 收到定时轮询的信息之后,50ms发送一次检验主备机的状态
+        }
+#endif
+        memset ( &g_tCanRxMsg,0,sizeof (g_tCanRxMsg) );
         ret = canOutQueue( &g_tCanRxQueue, &g_tCanRxMsg );
 
         if ( 0 == ret )
@@ -223,7 +299,8 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-        delayMs (1);
+
+        //delayMs (1);
 
     }
 }

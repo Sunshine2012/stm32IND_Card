@@ -104,6 +104,11 @@ extern u8 g_ucaHasBadCard[4];    // 有坏卡
 extern u8 g_ucaMasterStandbyStatus[4];  // 卡机的主备机状态
 extern u8 g_ucaStatus[4];        // 卡机的工作状态
 
+extern u8 g_ucP_RsctlFrame;      // 收到一帧正确的数据
+extern u8 g_ucIsUpdateMsgFlag;   // 向PC上报卡机消息标志位
+extern u8 g_ucIsCycleMsgFlag;    // 向卡机发送定时查询消息标志位
+
+
 extern u8 g_ucRepeatKeyMechine;  // 如果连续出现两张坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报按键值
 extern u8 g_ucBadCardCount;      // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 

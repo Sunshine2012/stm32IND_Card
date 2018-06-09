@@ -51,7 +51,7 @@ void CAN_NVIC_Config(void)
     NVIC_InitTypeDef NVIC_InitStructure;
 
     /* Configure the NVIC Preemption Priority Bits */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 #if 0
     #ifdef  VECT_TAB_RAM
         /* Set the Vector Table base location at 0x20000000 */

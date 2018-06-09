@@ -17,6 +17,95 @@
 
 #include "bsp_usart1.h"
 
+
+u8 g_ucaTxBuff[SENDBUFF_SIZE] = "你好, 欢迎使用乐为电子板卡系统";  // 使用全局的数据缓存
+u8 g_ucaRxBuff[SENDBUFF_SIZE];  // 使用全局的数据缓存
+u8 (*g_ucpTxBuff)[SENDBUFF_SIZE] = &g_ucaTxBuff;
+u8 g_num = 0;
+
+/**
+   * @brief  USART1 RX DMA 配置，外设(USART1->DR)到内存
+   * @param  无
+   * @retval 无
+   */
+void USART1_RX_DMA_Config(void)
+{
+    DMA_InitTypeDef DMA_InitStructure;
+
+    // 开启DMA时钟
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    // 设置DMA源地址：串口数据寄存器地址*/
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)USART1_DR_ADDRESS;
+    // 内存地址(要传输的变量的指针)
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32)g_ucaRxBuff;
+    // 方向：从外设到内存
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+    // 传输大小
+    DMA_InitStructure.DMA_BufferSize = SENDBUFF_SIZE;
+    // 外设地址不增
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    // 内存地址自增
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    // 外设数据单位
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    // 内存数据单位
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    // DMA模式，一次或者循环模式
+    //DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    // 优先级：高
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+    // 禁止内存到内存的传输
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    // 配置DMA通道
+    DMA_Init(USART1_RX_DMA_CHANNEL, &DMA_InitStructure);
+    // 使能DMA
+    DMA_Cmd (USART1_RX_DMA_CHANNEL,ENABLE);
+}
+
+
+
+ /**
+   * @brief  USARTx TX DMA 配置，内存到外设(USART1->DR)
+   * @param  无
+   * @retval 无
+   */
+
+void USART1_TX_DMA_Config(void)
+{
+    DMA_InitTypeDef DMA_InitStructure;
+
+    // 开启DMA时钟
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    // 设置DMA源地址：串口数据寄存器地址*/
+    DMA_InitStructure.DMA_PeripheralBaseAddr = USART1_DR_ADDRESS;
+    // 内存地址(要传输的变量的指针)
+    DMA_InitStructure.DMA_MemoryBaseAddr = (u32)g_ucpTxBuff;
+    // 方向：从内存到外设
+    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+    // 传输大小
+    DMA_InitStructure.DMA_BufferSize = SENDBUFF_SIZE;
+    // 外设地址不增
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    // 内存地址自增
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    // 外设数据单位
+    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    // 内存数据单位
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    // DMA模式，一次或者循环模式
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal ;
+    //DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+    // 优先级：高
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    // 禁止内存到内存的传输
+    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+    // 配置DMA通道
+    DMA_Init(USART1_TX_DMA_CHANNEL, &DMA_InitStructure);
+    // 使能DMA
+    DMA_Cmd (USART1_TX_DMA_CHANNEL,ENABLE);
+ }
+
  /**
   * @brief  配置嵌套向量中断控制器NVIC
   * @param  无
@@ -27,14 +116,14 @@ static void UART1_NVIC_Configuration(void)
   NVIC_InitTypeDef NVIC_InitStructure;
 
   /* 嵌套向量中断控制器组选择 */
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
 
   /* 配置USART为中断源 */
   NVIC_InitStructure.NVIC_IRQChannel = macUSART1_IRQ;
   /* 抢断优先级*/
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   /* 子优先级 */
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   /* 使能中断 */
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   /* 初始化配置NVIC */
@@ -87,13 +176,44 @@ void USART1_Config(void)
     UART1_NVIC_Configuration();
 
     // 使能串口接收中断
-    USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
+    //USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
+
+    //USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
+    //USART_ITConfig(macUSART1, USART_IT_TC,   DISABLE);
+    //USART_ITConfig(macUSART1, USART_IT_TXE,  DISABLE);
+    /* 使能IDLE中断 */
+    USART_ITConfig(macUSART1, USART_IT_IDLE, ENABLE);
+
+    // 主要是配置外设地址和内存地址以及缓冲区大小，
+    // 配置好后DMA就会自动的把串口数据存到相应的内存地址。
+    USART1_RX_DMA_Config();
+
+    USART1_TX_DMA_Config();
+
+    //配置串口1DMA接收
+    USART_DMACmd(macUSART1, USART_DMAReq_Rx, ENABLE);
+
+    // USART1 向 DMA发出TX请求
+    USART_DMACmd(macUSART1, USART_DMAReq_Tx, ENABLE);
 
     // 使能串口
     USART_Cmd(macUSART1, ENABLE);
 
     // 清除发送完成标志
     //USART_ClearFlag(USART1, USART_FLAG_TC);
+}
+
+
+/*****************  通过DMA发送字符串 **********************/
+void USART1_SendStringFromDMA( u8 *str, u32 len )
+{
+    if ( ( NULL != str ) && ( 0 != len ) )
+    {
+        DMA_Cmd(USART1_TX_DMA_CHANNEL,DISABLE);
+        USART1_TX_DMA_CHANNEL->CNDTR = len;
+        USART1_TX_DMA_CHANNEL->CMAR = (u32)str;
+        DMA_Cmd(USART1_TX_DMA_CHANNEL,ENABLE);
+    }
 }
 
 /*****************  发送一个字符 **********************/
