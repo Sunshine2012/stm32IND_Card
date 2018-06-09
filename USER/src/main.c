@@ -11,7 +11,7 @@ u8 g_ucUpWorkingID      = 1;            // 上工位工作卡机号
 u8 g_ucUpBackingID      = 2;            // 上工位备用卡机号
 u8 g_ucDownWorkingID    = 3;            // 下工位工作卡机号
 u8 g_ucDownBackingID    = 4;            // 下工位备用卡机号
-u8 g_ucCurOutCardId     = 1;            // 当前出卡的卡机号
+u8 g_ucCurOutCardId     = 0;            // 当前出卡的卡机号
 u8 g_ucLockPressKey     = 0;            // 按键锁定
 u8 g_ucRepeatKeyMechine = 0;            // 如果连续出现坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报状态
 u8 g_ucBadCardCount     = 0;            // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
@@ -111,10 +111,10 @@ void lcdRef()
                 doShowMainMenu ( DLG_MAIN, 0, NULL );    // 进入设置状态
                 break;
 
-            case DLG_WORKING_SET:
+            /*case DLG_WORKING_SET:
                 doShowWorkingSet ( DLG_WORKING_SET, 1, NULL );
                 break;
-
+            */
             case DLG_STATUS_ONE:
                 doShowStatusOne ( DLG_STATUS_ONE, 5, NULL );
                 break;
@@ -205,28 +205,30 @@ int main( void )
 
     g_dlg[check_menu(DLG_CONNETCT_SET)].highLightRow = g_ucConnectMode == 1 ? 1: 2;    // 出厂为离线发卡
 
-    myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    delayMs (1000);
-    myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    delayMs (1000);
-    IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-	myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    delayMs (1000);
-    myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //myCANTransmit( gt_TxMessage, g_ucUpWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //delayMs (1000);
+    //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //delayMs (1000);
+    //IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
+	//myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
+    //delayMs (1000);
+    //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     //printf ("%s\n","你好, 欢迎使用乐为电子板卡系统");
-    delayMs (1000);
+    //delayMs (1000);
     printf ("the code version %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
-    printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
-    delayMs( 100 ); // 等待卡机回复
-    for ( i = 0; i < 4; i++)
-    {
-        if (0 == g_ucaMechineExist[i])
-        {
-            myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
-            g_ucaFaultCode[i] = FAULT_CODE11;
-        }
-    }
+    //printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
+    USART1_SendStringFromDMA ((char *)&g_tCardMechinePowerOnFrame , strlen ((char *)&g_tCardMechinePowerOnFrame)); // 按键消息
+
+    //delayMs( 100 ); // 等待卡机回复
+    //for ( i = 0; i < 4; i++)
+    //{
+    //    if (0 == g_ucaMechineExist[i])
+    //    {
+    //        myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
+    //        g_ucaFaultCode[i] = FAULT_CODE11;
+    //    }
+    //}
 
     g_siKeyTime = 100;
 
@@ -240,8 +242,6 @@ int main( void )
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
-
-    IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
 
     while ( 1 )
     {
@@ -299,8 +299,6 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-
-        //delayMs (1);
 
     }
 }
