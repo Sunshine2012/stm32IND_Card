@@ -26,8 +26,8 @@ CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame =    {'<', '0', 'B', 
 /* 已出卡信息(43H)帧            6字节 */
 CARD_MECHINE_TO_PC_FRAME        g_tCardSpitOutFrame = {'<', '0', CARD_SPIT_OUT, '1', '1', '>'};
 
-/* 按钮取卡信息(44H)帧          7字节 */
-CARD_MECHINE_KEYPRESS_FRAME     g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1' ,'1','>'};
+/* 按钮取卡信息(44H)帧          6字节 */
+CARD_MECHINE_TO_PC_FRAME        g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1' ,'>'};
 
 /* 卡被取走信息(45H)帧          6字节 */
 CARD_MECHINE_TO_PC_FRAME        g_tCardTakeAwayFrame = {'<', '0', CARD_TAKE_AWAY, '1', '1', '>'};
@@ -534,9 +534,11 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
                 break;
             case PC_GET_DIST:                 /* 测距帧 */
                 break;
-            case PC_CAR_HAS_COMING:           /* 车已来 */
+            case PC_CAR_HAS_COME:             /* 车已来 */
+                myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, CAR_HAS_COME, 0, 0, 0, NO_FAIL );
                 break;
             case PC_CAR_HAS_GONE:             /* 车已走 */
+                myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, CAR_HAS_GONE, 0, 0, 0, NO_FAIL );
                 break;
             case MECHINE_CODE_VERSION:
                 printf ("the code version %s,%s\n", __DATE__,__TIME__);

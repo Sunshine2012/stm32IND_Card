@@ -29,7 +29,7 @@ typedef enum FRAME
     PC_QUERY_CARD_MECHINE   = 'e',      /* ²éÑ¯¿¨»ú×´Ì¬(65H)Ö¡          5×Ö½Ú */
     PC_QUERY_CARD_CLIP      = 'f',      /* ²éÑ¯¿¨¼Ð(66H)Ö¡              5×Ö½Ú */
     PC_SET_CARD_NUM         = 'g',      /* ÉèÖÃ¿¨¼Ð¿¨Êý(67H)Ö¡          8×Ö½Ú */
-    PC_CAR_HAS_COMING       = 'h',      /* ³µÒÑÀ´ÐÅÏ¢ */
+    PC_CAR_HAS_COME         = 'h',      /* ³µÒÑÀ´ÐÅÏ¢ */
     PC_CAR_HAS_GONE         = 'i',      /* ³µÒÑ×ßÐÅÏ¢ */
     MECHINE_CODE_VERSION    = 'v',      /* °æ±¾ */
 
@@ -184,6 +184,11 @@ typedef enum CMD
     CYCLE_ACK               = 0x04,                 /* ¶¨Ê±»Ø¸´ */
     SET_MECHINE_STATUS      = 0x05,                 /* ¿¨»ú¹¤×÷×´Ì¬ÉèÖÃ */
     SET_MECHINE_STATUS_ACK  = 0x06,                 /* ¿¨»ú¹¤×÷×´Ì¬ÉèÖÃ»Ø¸´ */
+    CAR_HAS_COME            = 0x07,                 /* ³µÒÑÀ´ÐÅÏ¢ */
+    CAR_HAS_COME_ACK        = 0x08,                 /* ³µÒÑÀ´ÐÅÏ¢»Ø¸´ */
+    CAR_HAS_GONE            = 0x09,                 /* ³µÒÑ×ßÐÅÏ¢ */
+    CAR_HAS_GONE_ACK        = 0x0A,                 /* ³µÒÑ×ßÐÅÏ¢»Ø¸´ */
+                                                    /* Ê¹ÓÃÔÁÍ¨¿¨ */
 
     // 10H--1FH£ºÖ÷»ú°å·¢ËÍÖÁ¿¨»ú°åÐÅÏ¢ÃüÁî
     SET_MECHINE_ID          = 0x10,                 /* ÉèÖÃ¿¨»úµÄIDºÅ */
@@ -249,10 +254,6 @@ typedef enum CARD_AND_MECHINE_STATUS
     WORKING_STATUS             = 0x01,                 /* ¹¤×÷×´Ì¬ */
     BACKING_STATUS             = 0x02,                 /* ±¸»ú×´Ì¬ */
     DEBUGING_STATUS            = 0x03,                 /* µ÷ÊÔ×´Ì¬ */
-                                                       /* ÒÑÀ´³µ */
-                                                       /* ³µÒÑ×ß */
-                                                       /* Ê¹ÓÃÔÁÍ¨¿¨ */
-
 
     // 10H--1FH£º¿¨×´Ì¬
     HAS_CARD                   = 0x10,                 /* ÓÐ¿¨ */
@@ -325,7 +326,7 @@ extern RSCTL_FREME                      g_tN_RsctlFrame;                    /* ¸
 extern CARD_MACHINE_POWER_ON_FREME      g_tCardMechinePowerOnFrame;         /* ¿¨»úÉÏµçÐÅÏ¢(41H)Ö¡          4×Ö½Ú */
 extern CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame;          /* ×´Ì¬ÐÅÏ¢(42H)Ö¡             30×Ö½Ú */
 extern CARD_MECHINE_TO_PC_FRAME         g_tCardSpitOutFrame;                /* ÒÑ³ö¿¨ÐÅÏ¢(43H)Ö¡            6×Ö½Ú */
-extern CARD_MECHINE_KEYPRESS_FRAME      g_tCardKeyPressFrame;               /* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          6×Ö½Ú */
+extern CARD_MECHINE_TO_PC_FRAME         g_tCardKeyPressFrame;               /* °´Å¥È¡¿¨ÐÅÏ¢(44H)Ö¡          6×Ö½Ú */
 extern CARD_MECHINE_TO_PC_FRAME         g_tCardTakeAwayFrame;               /* ¿¨±»È¡×ßÐÅÏ¢(45H)Ö¡          6×Ö½Ú */
 extern CARD_REPORT_SPIT_STATUES_FRAME   g_tCardReportSpitStatusFrame;       /* ÉÏ±¨¿¨¼ÐºÅ±àºÅÐÅÏ¢(46H)Ö¡   36×Ö½Ú */
 
