@@ -53,7 +53,7 @@ void  GENERAL_TIM3_IRQHandler (void)
         {
            if ( --g_siSendToPcMsgTime == 0 )
            {
-                g_siSendToPcMsgTime = 4;
+                g_siSendToPcMsgTime = 10;
                 memset ( g_ucaUartTxMsg,0,50 );
                 if ( 0 == uartOutQueue( &g_tUARTTxQueue, g_ucaUartTxMsg ) )
                 {

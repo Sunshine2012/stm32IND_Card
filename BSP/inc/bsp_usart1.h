@@ -21,6 +21,8 @@
 #define             macUSART1_RX_PIN                          GPIO_Pin_10
 #define             macUSART1_IRQ                             USART1_IRQn
 #define             macUSART1_IRQHandler                      USART1_IRQHandler
+#define             macUSART1_DMA_TX_IRQ                      DMA1_Channel4_IRQn
+#define             macUSART1_DMA_TX_IRQHandler               DMA1_Channel4_IRQHandler
 
 #else
 

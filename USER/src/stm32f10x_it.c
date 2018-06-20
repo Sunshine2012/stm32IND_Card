@@ -179,7 +179,8 @@ void macUSART1_IRQHandler( void )
             DMA_Cmd(USART1_RX_DMA_CHANNEL, DISABLE);//关闭DMA,防止处理其间有数据
 
             g_tP_RsctlFrame.RSCTL = g_ucaRxBuff[1];
-            g_ucP_RsctlFrame = 1;
+            //g_ucP_RsctlFrame = 1;
+            uartInQueue( &g_tUARTTxQueue, (char *)&g_tP_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
             g_ucaRxBuff[g_num + 1] = 0;    // 加上行尾标识符
             /* 发布消息到消息队列 queue */
             uartInQueue( &g_tUARTRxQueue, g_ucaRxBuff ); // 不考虑竞争,所以不设置自旋锁
@@ -203,6 +204,23 @@ void macUSART1_IRQHandler( void )
     }
 }
 
+
+// 串口发送中断服务函数
+void macUSART1_DMA_TX_IRQHandler( void )
+{
+    static u16 i = 0;
+
+    if( DMA_GetITStatus(DMA1_IT_TC4) != RESET )
+    {
+        g_siSendToPcMsgTime = 4;
+        //memset ( g_ucaUartTxMsg,0,50 );
+        //if ( 0 == uartOutQueue( &g_tUARTTxQueue, g_ucaUartTxMsg ) )
+        //{
+        //    USART1_SendStringFromDMA( (char *)g_ucaUartTxMsg, strlen( (const char *)g_ucaUartTxMsg ) );
+        //}
+        DMA_ClearITPendingBit(DMA1_IT_TC4); //清除全部中断标志
+    }
+}
 
 #if uart4
 

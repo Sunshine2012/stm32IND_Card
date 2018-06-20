@@ -250,11 +250,11 @@ int main( void )
     while ( 1 )
     {
 
-        if ( 1 == g_ucP_RsctlFrame )
-        {
-            g_ucP_RsctlFrame = 0;
-            uartInQueue( &g_tUARTTxQueue, (char *)&g_tP_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
-        }
+        //if ( 1 == g_ucP_RsctlFrame )
+        //{
+        //    g_ucP_RsctlFrame = 0;
+        //    uartInQueue( &g_tUARTTxQueue, (char *)&g_tP_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
+        //}
 
         if ( 1 == g_ucIsUpdateMsgFlag )
         {

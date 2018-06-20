@@ -102,6 +102,8 @@ void USART1_TX_DMA_Config(void)
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     // 配置DMA通道
     DMA_Init(USART1_TX_DMA_CHANNEL, &DMA_InitStructure);
+    //配置DMA发送完成后产生中断
+    DMA_ITConfig(USART1_TX_DMA_CHANNEL,DMA_IT_TC,ENABLE);
     // 使能DMA
     DMA_Cmd (USART1_TX_DMA_CHANNEL,ENABLE);
  }
@@ -124,6 +126,30 @@ static void UART1_NVIC_Configuration(void)
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   /* 子优先级 */
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  /* 使能中断 */
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  /* 初始化配置NVIC */
+  NVIC_Init(&NVIC_InitStructure);
+}
+
+ /**
+  * @brief  配置嵌套向量中断控制器NVIC
+  * @param  无
+  * @retval 无
+  */
+static void UART1_DMA_NVIC_Configuration(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+
+  /* 嵌套向量中断控制器组选择 */
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+
+  /* 配置USART为中断源 */
+  NVIC_InitStructure.NVIC_IRQChannel = macUSART1_DMA_TX_IRQ;
+  /* 抢断优先级*/
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  /* 子优先级 */
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   /* 使能中断 */
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   /* 初始化配置NVIC */
@@ -174,6 +200,7 @@ void USART1_Config(void)
 
     // 串口中断优先级配置
     UART1_NVIC_Configuration();
+    UART1_DMA_NVIC_Configuration();
 
     // 使能串口接收中断
     //USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
