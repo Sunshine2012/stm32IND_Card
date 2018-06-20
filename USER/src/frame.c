@@ -278,7 +278,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                         g_tCardKeyPressFrame.MECHINE_ID = g_ucCurOutCardId + '0';        // 将数据转换为字符,然后将数据发送出去
                         g_tCardKeyPressFrame.CARD_MECHINE = g_ucCurOutCardId <= 2 ? '1' : '2';   //
 
-                        USART1_SendStringFromDMA ((char *)&g_tCardKeyPressFrame , strlen ((char *)&g_tCardKeyPressFrame)); // 按键消息
+                        uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardKeyPressFrame ); // 不考虑竞争,所以不设置自旋锁
 
                         g_siStatusOverTimeL = 1000;         // 一定时间如果还没有发卡完成,故障处理
 
@@ -288,7 +288,6 @@ u8 analyzeCANFrame ( CanRxMsg arg )
 
                         copyMenu ( g_ucCurOutCardId, KEY_PRESS, 0, 8, 4 );
                         DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_KEY_PRESS ) );
-
 
                     }
                     else if (mtRxMessage.Data[4] == HAS_NO_CARD)
@@ -341,8 +340,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardSpitOutFrame.CARD_MECHINE = mtRxMessage.Data[1] <= 2 ? '1' : '2';
                 g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                //printf ("%s\n", (char *)&g_tCardSpitOutFrame);
-                USART1_SendStringFromDMA ((char *)&g_tCardSpitOutFrame , strlen ((char *)&g_tCardSpitOutFrame));
+
+                uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardSpitOutFrame ); // 不考虑竞争,所以不设置自旋锁
 
                 TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
 
@@ -362,8 +361,7 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
                 g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-                //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-                USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
+                uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardMechineStatusFrame ); // 不考虑竞争,所以不设置自旋锁
 
                 g_siStatusOverTimeL = 1000;
                 g_siStatusOverTimeS = 0;
@@ -391,7 +389,8 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                 g_tCardTakeAwayFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                 g_tCardTakeAwayFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
                 g_tCardTakeAwayFrame.CARD_MECHINE = mtRxMessage.Data[1] < 3 ? '1' : '2';
-                USART1_SendStringFromDMA ((char *)&g_tCardTakeAwayFrame , strlen ((char *)&g_tCardTakeAwayFrame));
+
+                uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardTakeAwayFrame ); // 不考虑竞争,所以不设置自旋锁
 
                 g_ucaDeviceStatus[mtRxMessage.Data[1] - 1] = 0;  // 表明卡已经被取走,置位状态
 
@@ -427,16 +426,9 @@ u8 analyzeCANFrame ( CanRxMsg arg )
                     g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                     g_tCardSpitOutFrame.CARD_MECHINE = '3';
                     g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
-                    USART1_SendStringFromDMA ((char *)&g_tCardSpitOutFrame , strlen ((char *)&g_tCardSpitOutFrame));
-                }
-                //g_tCardMechineStatusFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
-                //g_tCardMechineStatusFrame.CARD_MECHINE1.antHasCard = g_ucaCardIsReady[ mtRxMessage.Data[1] - 1 ] + '0';
-                //g_tCardMechineStatusFrame.CARD_MECHINE1.status = g_ucaFaultCode[ mtRxMessage.Data[1] - 1 ] > 0 ? '1' : '0';
-                //g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
-                //g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
+                    uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardSpitOutFrame ); // 不考虑竞争,所以不设置自旋锁
 
-                //printf ( "%s\n", ( char * ) &g_tCardMechineStatusFrame );
-                //USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame));
+                }
                 g_ucIsUpdateMsgFlag = 1;
 
                 g_ucaDeviceStatus[ mtRxMessage.Data[1] - 1 ] = 0;
@@ -535,10 +527,10 @@ u8  analyzeUartFrame ( const u8 argv[] , u32 size)
             case PC_GET_DIST:                 /* 测距帧 */
                 break;
             case PC_CAR_HAS_COME:             /* 车已来 */
-                myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, CAR_HAS_COME, 0, 0, 0, NO_FAIL );
+                myCANTransmit ( gt_TxMessage, 3, 0, CAR_HAS_COME, 0, 0, 0, NO_FAIL );
                 break;
             case PC_CAR_HAS_GONE:             /* 车已走 */
-                myCANTransmit ( gt_TxMessage, g_ucCurOutCardId, 0, CAR_HAS_GONE, 0, 0, 0, NO_FAIL );
+                myCANTransmit ( gt_TxMessage, 3, 0, CAR_HAS_GONE, 0, 0, 0, NO_FAIL );
                 break;
             case MECHINE_CODE_VERSION:
                 printf ("the code version %s,%s\n", __DATE__,__TIME__);

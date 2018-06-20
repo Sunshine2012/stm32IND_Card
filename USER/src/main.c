@@ -30,9 +30,16 @@ u8 g_ucIsCycleMsgFlag = 0;               // 向卡机发送定时查询消息标志位
 u8 g_ucKeyPressCount = 0;                // 在2秒钟连续按键6次,则重启设备
 
 CanQueue  g_tCanRxQueue = {0};        // CAN接收卡机数据队列
+CanQueue  g_tCanTxQueue = {0};        // CAN发送给卡机数据队列
+
 UartQueue g_tUARTRxQueue = {0};       // UART接收PC机数据队列
-CanRxMsg  g_tCanRxMsg = {0};          // CAN数据出队元素
-u8 g_ucaUartRxMsg[50] = {0};          // UART数据出队元素
+UartQueue g_tUARTTxQueue = {0};       // UART发送给PC机数据队列
+
+CanRxMsg  g_tCanRxMsg = {0};          // CAN接收数据出队元素
+CanRxMsg  g_tCanTxMsg = {0};          // CAN发送数据出队元素
+
+u8 g_ucaUartRxMsg[50] = {0};          // UART接收数据出队元素
+u8 g_ucaUartTxMsg[50] = {0};          // UART接收数据出队元素
 
 u32 g_uiSerNum = 0;     // 帧序号,全局,卡机与主机之间的帧序号
 u32 g_uiSerNumPC = 0;   // 帧序号,全局,PC与主机之间的帧序号
@@ -49,25 +56,24 @@ void bspInit( void )
 {
     int i = 0;
     delayInit();                                                                // 定时函数
-    for (i = 0; i < 20; i++)    // 初始化时间延时20秒,避免卡机没有初始化完成
-    {
-        //delayMs (1000);
-    }
+
     LED_Init();                                                                 // 初始化 LED
     antGPIOInit();  // 天线切换引脚初始化
 
-    uartInitQueue( &g_tUARTRxQueue);                                            // 初始化 USART1
-    USART1_Config();
+    uartInitQueue( &g_tUARTRxQueue);
+    uartInitQueue( &g_tUARTTxQueue);
+    USART1_Config();                                                            // 初始化 USART1
 
     //USART4_Config ();         // 初始化 USART4
-    DAC_init();
+    //DAC_init();
     matrixKeyboardInit();
     lcdInit();
     canInitQueue( &g_tCanRxQueue );
+    canInitQueue( &g_tCanTxQueue );
     canInit();                                                                  // 初始化CAN通信
 
-    generalTIM2Init();          // 定时器初始化,2s定时上报状态信息
-    generalTIM3Init();          // 定时器初始化,30s定时无按键按下,退回到主界面
+    generalTIM2Init();                                                          // 定时器2初始化
+    generalTIM3Init();                                                          // 定时器3初始化
     //I2C_Configuration();
 
     IWDG_Init( 6, 625 );                                                        // 分频数为256,重载值为625,溢出时间为4s   (1/40000)* 256 * 625  = 4s          40000代表着独立看门狗的RC振荡器为40KHz
@@ -189,8 +195,7 @@ void updateMsg(void)
     g_tCardMechineStatusFrame.UP_SPIT_IS_OK = g_ucUpWorkingID + '0';
     g_tCardMechineStatusFrame.DOWN_SPIT_IS_OK = g_ucDownWorkingID + '0';
 
-    USART1_SendStringFromDMA ((char *)&g_tCardMechineStatusFrame , strlen ((char *)&g_tCardMechineStatusFrame)); // 2秒上报一次系统消息
-
+    uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardMechineStatusFrame ); // 不考虑竞争,所以不设置自旋锁
 }
 
 int main( void )
@@ -198,7 +203,7 @@ int main( void )
 {
     u8 ret = 0;
     u8 i = 0;
-
+    u8 version[50] = {0};
     bspInit();
 
     STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)&g_ucConnectMode,1);                    // 获取g_ucConnectMode值,默认为上位机离线发卡模式
@@ -209,16 +214,15 @@ int main( void )
     //delayMs (1000);
     //myCANTransmit( gt_TxMessage, g_ucUpBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     //delayMs (1000);
-    //IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
     //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     //delayMs (1000);
     //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    //printf ("%s\n","你好, 欢迎使用乐为电子板卡系统");
     //delayMs (1000);
-    printf ("the code version %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
+    sprintf (version, "the version is %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
-    //printf ("%s\n",( char * ) &g_tCardMechinePowerOnFrame);                   // 上电初始化
-    USART1_SendStringFromDMA ((char *)&g_tCardMechinePowerOnFrame , strlen ((char *)&g_tCardMechinePowerOnFrame)); // 按键消息
+    uartInQueue( &g_tUARTTxQueue, (char *)version ); // 不考虑竞争,所以不设置自旋锁
+
+    uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardMechinePowerOnFrame ); // 上电初始化    不考虑竞争,所以不设置自旋锁
 
     //delayMs( 100 ); // 等待卡机回复
     //for ( i = 0; i < 4; i++)
@@ -242,14 +246,14 @@ int main( void )
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
-
+    g_siSendToPcMsgTime = 5;
     while ( 1 )
     {
 
         if ( 1 == g_ucP_RsctlFrame )
         {
             g_ucP_RsctlFrame = 0;
-            USART1_SendStringFromDMA ((char *)&g_tP_RsctlFrame , strlen ((char *)&g_tP_RsctlFrame));
+            uartInQueue( &g_tUARTTxQueue, (char *)&g_tP_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
         }
 
         if ( 1 == g_ucIsUpdateMsgFlag )

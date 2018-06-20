@@ -108,7 +108,6 @@ extern u8 g_ucP_RsctlFrame;      // 收到一帧正确的数据
 extern u8 g_ucIsUpdateMsgFlag;   // 向PC上报卡机消息标志位
 extern u8 g_ucIsCycleMsgFlag;    // 向卡机发送定时查询消息标志位
 
-
 extern u8 g_ucRepeatKeyMechine;  // 如果连续出现两张坏卡,则记录即将发卡的卡机,等待500ms之后,再次检测卡机是否就绪并上报按键值
 extern u8 g_ucBadCardCount;      // 如果连续出现4张坏卡,则记录即将发卡的卡机,则不再发卡
 
@@ -118,10 +117,16 @@ extern Dlg           g_dlg[];
 extern Dlg g_dlg_fault_code[];
 
 extern CanQueue  g_tCanRxQueue;        // CAN接收卡机数据队列
-extern UartQueue g_tUARTRxQueue;       // UART接收PC机数据队列
-extern CanRxMsg  g_tCanRxMsg;          // CAN数据出队元素
-extern u8 g_ucaUartRxMsg[50];          // UART数据出队元素
+extern CanQueue  g_tCanTxQueue;        // CAN发送给卡机数据队列
 
+extern UartQueue g_tUARTRxQueue;       // UART接收PC机数据队列
+extern UartQueue g_tUARTTxQueue;       // UART发送给PC机数据队列
+
+extern CanRxMsg  g_tCanRxMsg;          // CAN接收数据出队元素
+extern CanRxMsg  g_tCanTxMsg;          // CAN发送数据出队元素
+
+extern u8 g_ucaUartRxMsg[50];          // UART接收数据出队元素
+extern u8 g_ucaUartTxMsg[50];          // UART接收数据出队元素
 
 extern u32 g_uiSerNum;      // 帧序号,全局,卡机与主机之间的帧序号
 extern u32 g_uiSerNumPC;    // 帧序号,全局,PC与主机之间的帧序号

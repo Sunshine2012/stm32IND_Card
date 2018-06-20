@@ -11,7 +11,7 @@ s32 g_siOutCardMsgTime = 0;     // 重复发送翻卡信息的次数
 s32 g_siCardTakeMsgTime = 0;    // 重复发送取卡信息的次数
 s32 g_siCheckStatus = 0;        // 检查卡机的状态时间间隔
 s32 g_siaCheck[4] = {0};        // 检查卡机的通讯状态时间间隔
-
+s32 g_siSendToPcMsgTime = 0;    // 通过串口发送数据的间隔
 
 /**
   * @brief  This function handles TIM interrupt request.
@@ -49,9 +49,22 @@ void  GENERAL_TIM3_IRQHandler (void)
     {
         TIM_ClearITPendingBit(GENERAL_TIM3 , TIM_FLAG_Update);       // 清中断
 
+        if ( g_siSendToPcMsgTime > 0)
+        {
+           if ( --g_siSendToPcMsgTime == 0 )
+           {
+                g_siSendToPcMsgTime = 4;
+                memset ( g_ucaUartTxMsg,0,50 );
+                if ( 0 == uartOutQueue( &g_tUARTTxQueue, g_ucaUartTxMsg ) )
+                {
+                    USART1_SendStringFromDMA( (char *)g_ucaUartTxMsg, strlen( (const char *)g_ucaUartTxMsg ) );
+                }
+            }
+        }
+
         if ( g_siKeyTime > 0 )
         {
-            if ( ( --g_siKeyTime == 0) )//&& ( g_ucIsSetting != 0 )
+            if ( ( --g_siKeyTime == 0) )    // && ( g_ucIsSetting != 0 )
             {
                 g_ucIsSetting = 0;
                 g_ucCurDlg = DLG_STATUS;
@@ -111,7 +124,7 @@ void  GENERAL_TIM3_IRQHandler (void)
 
                             g_tCardTakeAwayFrame.MECHINE_ID = g_ucCurOutCardId + '0';
                             g_tCardTakeAwayFrame.CARD_MECHINE = g_ucCurOutCardId < 3 ? '1' : '2';
-                            USART1_SendStringFromDMA ((char *)&g_tCardTakeAwayFrame , strlen ((char *)&g_tCardTakeAwayFrame));
+                            uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardTakeAwayFrame ); // 不考虑竞争,所以不设置自旋锁
 
                             g_uiCurNum = g_tCardTakeAwayFrame.RSCTL;
                         }
@@ -120,7 +133,7 @@ void  GENERAL_TIM3_IRQHandler (void)
                             g_uiCurNum = 0;
                         }
                         */
-                        
+
 
                     default:
                         break;

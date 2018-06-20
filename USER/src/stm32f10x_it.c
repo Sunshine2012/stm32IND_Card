@@ -192,7 +192,8 @@ void macUSART1_IRQHandler( void )
         }
         else // 发送负应答
         {
-            USART1_SendStringFromDMA ((char *)&g_tN_RsctlFrame , sizeof (g_tN_RsctlFrame));
+            uartInQueue( &g_tUARTTxQueue, (char *)&g_tN_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
+
             g_num = 0;
             g_ucaRxBuff[0] = 0;
             DMA_Cmd(USART1_RX_DMA_CHANNEL, DISABLE);//关闭DMA,防止处理其间有数据

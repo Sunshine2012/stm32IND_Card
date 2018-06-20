@@ -324,12 +324,10 @@ u8 uartOutQueue( UartQueue * const p_tQueue, u8 * p_ucaReturnNode )
         p_tQueue->empty = 1;
         return 1;
     }
-    USART_ITConfig(macUSART1, USART_IT_RXNE, DISABLE);
     // 数据出队列
     strcpy( p_ucaReturnNode, p_tQueue->news[p_tQueue->bottom] );
     p_tQueue->bottom = ( p_tQueue->bottom + 1 ) % RX_DATA_BUFF_SIZE;
     p_tQueue->full = 0;
-    USART_ITConfig(macUSART1, USART_IT_RXNE, ENABLE);
 
     return 0;
 }

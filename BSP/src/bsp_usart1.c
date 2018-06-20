@@ -18,7 +18,7 @@
 #include "bsp_usart1.h"
 
 
-u8 g_ucaTxBuff[SENDBUFF_SIZE] = "你好, 欢迎使用乐为电子板卡系统";  // 使用全局的数据缓存
+u8 g_ucaTxBuff[SENDBUFF_SIZE] = "你好, 欢迎使用乐为电子发卡机系统\n";  // 使用全局的数据缓存
 u8 g_ucaRxBuff[SENDBUFF_SIZE];  // 使用全局的数据缓存
 u8 (*g_ucpTxBuff)[SENDBUFF_SIZE] = &g_ucaTxBuff;
 u8 g_num = 0;

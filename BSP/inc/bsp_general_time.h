@@ -67,8 +67,7 @@ extern s32 g_siOutCardMsgTime;          // 重复发送翻卡信息的次数
 extern s32 g_siCardTakeMsgTime;         // 重复发送取卡信息的次数
 extern s32 g_siCheckStatus;             // 检查卡机的状态时间间隔
 extern s32 g_siaCheck[4];               // 检查卡机的通讯状态时间间隔
-
-
+extern s32 g_siSendToPcMsgTime;         // 通过串口发送数据的间隔
 
 void generalTIM2Init(void);
 void generalTIM3Init(void);
