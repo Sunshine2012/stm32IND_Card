@@ -1230,7 +1230,7 @@ while_label:
             break;
         case KEY_CANCEL:
             g_ucaFaultCode[faultCodeIndex] = 0;
-            myCANTransmit(gt_TxMessage, faultCodeIndex + 1, NO_FAIL, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, faultCode);
+            myCANTransmit(gt_TxMessage, faultCodeIndex + 1, (faultCodeIndex + 1) % 2, CLEAR_FAULT_CODE, CLEAR_FAULT, NO_FAIL, NO_FAIL, faultCode);
             for (i = 0; i < 4; i++)     // 故障解除之后,清除标志,进入等待状态,等待正常的发卡流程
             {
                 g_ucaDeviceStatus[i] = 0;
