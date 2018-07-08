@@ -119,8 +119,8 @@ u8 myCANTransmit (CanTxMsg mMsg, u8 mechine_id, u8 boxNum, u8 cmd, u8 status,
                       u8 data_H, u8 data_L, u8 errNum)
 {
     u32 i = 0;
-    u8 TransmitMailbox;
-    u8 ucMechineIdTemp;
+    u8 TransmitMailbox = 0;
+    u8 ucMechineIdTemp = 0;
     switch( mechine_id )
     {
         case 1:
@@ -132,6 +132,7 @@ u8 myCANTransmit (CanTxMsg mMsg, u8 mechine_id, u8 boxNum, u8 cmd, u8 status,
             ucMechineIdTemp = 0x02;
             break;
         default:
+            ucMechineIdTemp = 0x03;
             break;
     }
     mMsg.StdId = 0x00;
@@ -315,7 +316,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
             {
                 g_ucaCardIsReady[gt_RxMessage.Data[1] - 1] = 0;
             }
-            g_siaCheck[gt_RxMessage.Data[1] - 1] = 1200;        // 12秒没有收到卡机回复,发初始化命令,报警
             g_ucaMasterStandbyStatus[gt_RxMessage.Data[1] - 1] = gt_RxMessage.Data[2];
             g_ucaStatus[gt_RxMessage.Data[1] - 1] = gt_RxMessage.Data[7];
 
@@ -364,6 +364,8 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
         {
             canInQueue (&g_tCanRxQueue, &gt_RxMessage);
         }
+        //g_siaCheck[gt_RxMessage.Data[1] - 1] = 6000;        // 60秒没有收到卡机回复,发初始化命令,报警
+
     }
     else
     {

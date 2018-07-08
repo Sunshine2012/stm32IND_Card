@@ -1243,3 +1243,216 @@ while_label:
             break;
     }
 }
+
+
+// 设置密码,如果有一行需要反显示,则设置当前行反显示,传递参数地址
+void doShowPassWordMenu (u8 dlg_id, u8 isNotRow, void * p_parm)
+{
+    u8 isSetMode = 0;   // 如果是设置模式/
+    u8 i = 0;
+    u8 j = 0;
+    u8 seek = 0;        // 指示当前调节的数据位置
+    u8 temp = 0;
+    u8 dlgId = check_menu(dlg_id);
+    u8 key = KEY_NUL;
+    u16 id = 0x7810 | g_ucCurID;                        // CAN通信的ID
+    u8 id_h = ( id >> 8 ) & 0xff;                       // CAN通信的ID高字节
+    u8 id_l = id & 0xff;                                // CAN通信的ID低字节
+    u8 cardCountShowSeek = 11;                          // 卡数量字符从此行中的第几个显示,默认从11个字节开始显示
+    u16 usaCardCount[4] = {1000,1001,1002,1003};        // 所有卡机初始化卡数量缓存
+    u8 str_aCardCount[4][6] = {0};                      // 所有卡机初始化卡数量缓存显示字符串
+
+    g_ucCurDlg = dlg_id;    // 记录当前显示的ID
+
+    for (i = 0; i < 4; i++)
+    {
+        usaCardCount[i] = g_uiaInitCardCount[i + 1];    // 复制初始化卡数量到缓存，以供修改
+    }
+    for (i = 0; i < 4; i++)
+    {
+        sprintf(str_aCardCount[i],"%04d",usaCardCount[i]);      // 格式化初始化卡数量到字符数组，以供显示,右对齐,高位不足用0补齐
+    }
+
+    for (i = 0; i < 4; i++)     // 复制初始化卡数量字符数组到显示缓存
+    {
+        for (j = 0; j < 4; j++)
+        {
+            g_dlg[dlgId].MsgRow[i][j + cardCountShowSeek] = str_aCardCount[i][j];
+        }
+    }
+    for (i = 0; i < 4; i++) // 显示
+    {
+        displayGB2312String (0, i * 2, g_dlg[dlgId].MsgRow[i], i == g_dlg[dlgId].highLightRow ? 1 : 0);
+    }
+    isTurnShow(0,g_dlg[dlgId].highLightRow);
+
+    key = g_ucKeyValues;
+    g_ucKeyValues = KEY_NUL;
+    switch (key)
+    {
+        case KEY_ENTRY:
+            switch (g_dlg[dlgId].highLightRow)
+            {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    isSetMode = 1;      // 进入设置模式,按取消键退出设置，再次按取消键才退回上一级菜单
+                    displayGB2312String (0, isNotRow * 2, g_dlg[dlgId].MsgRow[isNotRow], 0);
+                    sprintf(str_aCardCount[isNotRow],"%04d",usaCardCount[isNotRow]);      // 格式化初始化卡数量到字符数组，以供显示,右对齐,高位不足用0补齐
+
+                    displayGB2312StringLen (cardCountShowSeek, isNotRow * 2, &str_aCardCount[isNotRow][i], i == seek ? 1 : 0, 4); // 显示4字节
+
+                    isTurnShow(cardCountShowSeek / 2,isNotRow);
+                    key = KEY_NUL;      // 不再更新界面了
+                    g_ucIsUpdateMenu = 0;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case KEY_UP:
+            if (isSetMode)
+            {
+                switch(seek)
+                {
+                    case 0:
+                        temp = usaCardCount[isNotRow] / 1000;
+                        usaCardCount[isNotRow] = temp < 9 ? usaCardCount[isNotRow] + 1000 : usaCardCount[isNotRow];
+                        break;
+                    case 1:
+                        temp = usaCardCount[isNotRow] % 1000 / 100;
+                        usaCardCount[isNotRow] = temp < 9 ? usaCardCount[isNotRow] + 100 : usaCardCount[isNotRow];
+                        break;
+                    case 2:
+                        temp = usaCardCount[isNotRow] % 100 / 10;
+                        usaCardCount[isNotRow] = temp < 9 ? usaCardCount[isNotRow] + 10 : usaCardCount[isNotRow];
+                        break;
+                    case 3:
+                        temp = usaCardCount[isNotRow] % 10;
+                        usaCardCount[isNotRow] = temp < 9 ? usaCardCount[isNotRow] + 1 : usaCardCount[isNotRow];
+                        break;
+                }
+                sprintf(str_aCardCount[isNotRow],"%04d",usaCardCount[isNotRow]);        // 格式化初始化卡数量到字符数组，以供显示,右对齐,高位不足用0补齐
+                for (i = 0; i < 4; i++)
+                {
+                    displayGB2312String (cardCountShowSeek + i, isNotRow * 2, &str_aCardCount[isNotRow][i], i == seek ? 1 : 0);
+                }
+                isTurnShow(0,isNotRow);
+                key = KEY_NUL;      // 不再更新界面了
+                g_ucIsUpdateMenu = 0;
+            }
+            else            // 如果是设置模式,则调整的是值
+            {
+                if (0 < isNotRow)
+                {
+                    isNotRow--;
+                    isTurnShow(0,isNotRow);
+                    key = KEY_NUL;
+                }
+                else
+                {
+                    key = KEY_NUL;
+                }
+            }
+            break;
+        case KEY_DOWN:
+            if (isSetMode)
+            {
+                switch(seek)
+                {
+                    case 0:
+                        temp = usaCardCount[isNotRow] / 1000;
+                        usaCardCount[isNotRow] = temp > 0 ? usaCardCount[isNotRow] - 1000 : usaCardCount[isNotRow];
+                        break;
+                    case 1:
+                        temp = usaCardCount[isNotRow] % 1000 / 100;
+                        usaCardCount[isNotRow] = temp > 0 ? usaCardCount[isNotRow] - 100 : usaCardCount[isNotRow];
+                        break;
+                    case 2:
+                        temp = usaCardCount[isNotRow] % 100 / 10;
+                        usaCardCount[isNotRow] = temp > 0 ? usaCardCount[isNotRow] - 10 : usaCardCount[isNotRow];
+                        break;
+                    case 3:
+                        temp = usaCardCount[isNotRow] % 10;
+                        usaCardCount[isNotRow] = temp > 0 ? usaCardCount[isNotRow] - 1 : usaCardCount[isNotRow];
+                        break;
+                }
+                sprintf(str_aCardCount[isNotRow],"%04d",usaCardCount[isNotRow]);        // 格式化初始化卡数量到字符数组，以供显示,右对齐,高位不足用0补齐
+                for (i = 0; i < 4; i++)
+                {
+                    displayGB2312String (cardCountShowSeek + i, isNotRow * 2, &str_aCardCount[isNotRow][i], i == seek ? 1 : 0);
+                }
+                isTurnShow(0,isNotRow);
+                key = KEY_NUL;      // 不再更新界面了
+                g_ucIsUpdateMenu = 0;
+            }
+            else            // 如果是设置模式,则调整的是值
+            {
+                if (isNotRow < 3)
+                {
+                    isNotRow++;
+                    isTurnShow(0,isNotRow);
+                    key = KEY_NUL;
+                }
+                else
+                {
+                    key = KEY_NUL;
+                }
+            }
+
+            break;
+        case KEY_LEFT:
+            if (isSetMode && seek > 0)
+            {
+                seek--;
+                for (i = 0; i < 4; i++)
+                {
+                    displayGB2312String (cardCountShowSeek + i, isNotRow * 2, &str_aCardCount[isNotRow][i], i == seek ? 1 : 0);
+                }
+                isTurnShow(0,isNotRow);
+            }
+            key = KEY_NUL;
+            g_ucIsUpdateMenu = 0;
+            break;
+        case KEY_RIGHT:
+            if (isSetMode && seek < 3)
+            {
+                seek++;
+                for (i = 0; i < 4; i++)
+                {
+                    displayGB2312String (cardCountShowSeek + i, isNotRow * 2, &str_aCardCount[isNotRow][i], i == seek ? 1 : 0);
+                }
+                isTurnShow(0,isNotRow);
+            }
+            key = KEY_NUL;      // 不再更新界面了
+            g_ucIsUpdateMenu = 0;
+            break;
+        case KEY_OK:
+            isSetMode = 0;      // 退出设置模式
+            seek = 0;                   // 归零当前调节的数据位置
+            g_uiaInitCardCount[isNotRow + 1] = usaCardCount[isNotRow];
+            for (i = 0; i < 4; i++)     // 复制修改过的卡数量到显示缓存
+            {
+                for (j = 0; j < 4; j++)
+                {
+                    g_dlg[dlgId].MsgRow[i][j + cardCountShowSeek] = str_aCardCount[i][j];
+                }
+            }
+            break;
+        case KEY_CANCEL:
+            if (!isSetMode)
+            {
+                return;                     // 如果是非设置模式,则直接退出
+            }
+            else
+            {
+                isSetMode = 0;              // 退出设置模式
+                seek = 0;                   // 归零当前调节的数据位置
+            }
+            break;
+        default:
+            break;
+    }
+}
+

@@ -21,7 +21,7 @@ u8 g_ucaDeviceStatus[4] = {0, 0, 0, 0}; // 上或下两个卡机处于待机(Standby)状态下
 u8 g_ucaMechineExist[4] = {0, 0, 0, 0}; // 卡机是否存在并通信正常
 u8 g_ucaHasBadCard[4]  = {0, 0, 0, 0};  // 有坏卡
 u8 g_ucaMasterStandbyStatus[4]  = {0, 0, 0, 0};  // 卡机的主备机状态
-u8 g_ucaStatus[4]  = {0x0a, 0x0a, 0x0a, 0x0a};      // 卡机的工作状态
+u8 g_ucaStatus[4]  = {0xaa, 0xaa, 0xaa, 0xaa};      // 卡机的工作状态
 
 u8 g_ucP_RsctlFrame = 0;                 // 收到一帧正确的数据
 u8 g_ucIsUpdateMsgFlag = 0;              // 向PC上报卡机消息标志位
@@ -217,7 +217,7 @@ int main( void )
     //myCANTransmit( gt_TxMessage, g_ucDownWorkingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
     //delayMs (1000);
     //myCANTransmit( gt_TxMessage, g_ucDownBackingID, 0, CYCLE_ASK, 0, 0, 0, 0 ); // 查询是否有卡
-    //delayMs (1000);
+
     sprintf (version, "the version is %s,%s\n", __DATE__,__TIME__); // 打印当前版本号和编译日期
 
     uartInQueue( &g_tUARTTxQueue, (char *)version ); // 不考虑竞争,所以不设置自旋锁
@@ -236,25 +236,13 @@ int main( void )
 
     g_siKeyTime = 100;
 
-    //g_siaCheck[0] = 1200;
-    //g_siaCheck[1] = 1200;
-    //g_siaCheck[2] = 1200;
-    //g_siaCheck[3] = 1200;
-
-    //g_siCycleAskMsgTime = 2;      // 4秒查询一次卡机状态
     // 使能计数器
     TIM_Cmd(GENERAL_TIM2, ENABLE);
     // 使能计数器
     TIM_Cmd(GENERAL_TIM3, ENABLE);
-    g_siSendToPcMsgTime = 5;
+    //g_siSendToPcMsgTime = 5;
     while ( 1 )
     {
-
-        //if ( 1 == g_ucP_RsctlFrame )
-        //{
-        //    g_ucP_RsctlFrame = 0;
-        //    uartInQueue( &g_tUARTTxQueue, (char *)&g_tP_RsctlFrame ); // 不考虑竞争,所以不设置自旋锁
-        //}
 
         if ( 1 == g_ucIsUpdateMsgFlag )
         {
@@ -303,7 +291,6 @@ int main( void )
         matrixUpdateKey();          // 扫描按键
         lcdRef();                   // 刷新显示
         IWDG_Feed();                // 如果没有产生硬件错误,喂狗,以防硬件问题造成的司机,程序无响应
-
     }
 }
 

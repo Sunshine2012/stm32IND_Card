@@ -27,7 +27,7 @@ CARD_MACHINE_STATUES_FRAME       g_tCardMechineStatusFrame =    {'<', '0', 'B', 
 CARD_MECHINE_TO_PC_FRAME        g_tCardSpitOutFrame = {'<', '0', CARD_SPIT_OUT, '1', '1', '>'};
 
 /* 按钮取卡信息(44H)帧          6字节 */
-CARD_MECHINE_TO_PC_FRAME        g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1' ,'>'};
+CARD_MECHINE_TO_PC_FRAME        g_tCardKeyPressFrame = {'<', '0', CARD_KEY_PRESS, '1', '1', '>'};
 
 /* 卡被取走信息(45H)帧          6字节 */
 CARD_MECHINE_TO_PC_FRAME        g_tCardTakeAwayFrame = {'<', '0', CARD_TAKE_AWAY, '1', '1', '>'};
@@ -284,11 +284,10 @@ u8 analyzeCANFrame ( CanRxMsg arg )
 
                         g_ucLockPressKey = 1;
 
-                        g_ucaDeviceStatus[g_ucCurOutCardId -1] = 1; // 按键发卡流程开始之后，再次按键不再响应
+                        g_ucaDeviceStatus[g_ucCurOutCardId - 1] = 1; // 按键发卡流程开始之后，再次按键不再响应
 
                         copyMenu ( g_ucCurOutCardId, KEY_PRESS, 0, 8, 4 );
                         DEBUG_printf ( "%s\n", ( char * ) checkPriMsg ( CARD_KEY_PRESS ) );
-
                     }
                     else if (mtRxMessage.Data[4] == HAS_NO_CARD)
                     {
@@ -416,21 +415,20 @@ u8 analyzeCANFrame ( CanRxMsg arg )
             if ( ( mtRxMessage.Data[2] != 0xff ) && ( mtRxMessage.Data[4] == 0x21 ) && ( mtRxMessage.Data[7] <= FAULT_CODE11 ) )
             {
 
-                TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
-
-                if ( ( FAULT_CODE05 == g_ucaFaultCode[0] ) \
-                || ( FAULT_CODE06 == g_ucaFaultCode[1] ) \
-                || ( FAULT_CODE07 == g_ucaFaultCode[2] ) \
-                || ( FAULT_CODE08 == g_ucaFaultCode[3] ))    // 翻卡电机正转或者反转失败导致的发卡失败
+                if ( ( FAULT_CODE05 == mtRxMessage.Data[7] ) \
+                  || ( FAULT_CODE06 == mtRxMessage.Data[7] ) \
+                  || ( FAULT_CODE07 == mtRxMessage.Data[7] ) \
+                  || ( FAULT_CODE08 == mtRxMessage.Data[7] ) \
+                  && ( 0 != g_ucaFaultCode[mtRxMessage.Data[1] - 1] ) )    // 翻卡电机正转或者反转失败导致的发卡失败
                 {
                     g_tCardSpitOutFrame.RSCTL = (g_uiSerNumPC++ % 10) + '0';
                     g_tCardSpitOutFrame.CARD_MECHINE = '3';
                     g_tCardSpitOutFrame.MECHINE_ID = mtRxMessage.Data[1] + '0';
                     uartInQueue( &g_tUARTTxQueue, (char *)&g_tCardSpitOutFrame ); // 不考虑竞争,所以不设置自旋锁
-
                 }
-                g_ucIsUpdateMsgFlag = 1;
 
+                TIM_SetCounter(GENERAL_TIM2, 0);      // 定时器清零,2s之后再次上报消息
+                g_ucIsUpdateMsgFlag = 1;
                 g_ucaDeviceStatus[ mtRxMessage.Data[1] - 1 ] = 0;
 
                 if(mtRxMessage.Data[7] == FAULT_CODE11)

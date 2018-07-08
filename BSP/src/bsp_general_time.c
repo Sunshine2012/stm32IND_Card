@@ -133,7 +133,7 @@ void  GENERAL_TIM3_IRQHandler (void)
                             g_uiCurNum = 0;
                         }
                         */
-
+                        break;
 
                     default:
                         break;
@@ -148,7 +148,7 @@ void  GENERAL_TIM3_IRQHandler (void)
                if ( --g_siaCheck[i] == 0 )
                {
                     g_siaCheck[i] = 1200;
-                    if ( 0x0a == g_ucaStatus [i] )
+                    if ( 0xaa == g_ucaStatus [i] )
                     {
                         //myCANTransmit( gt_TxMessage, i + 1, 0, CARD_MACHINE_RESET, 0, 0, 0, NO_FAIL );
 
